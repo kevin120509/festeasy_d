@@ -1,7 +1,14 @@
 import 'package:festeasy/app/router/app_router.dart';
 import 'package:festeasy/app/router/auth_service.dart';
+import 'package:festeasy/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:festeasy/features/auth/domain/repositories/auth_repository.dart';
+import 'package:festeasy/features/auth/domain/usecases/login_usecase.dart';
+import 'package:festeasy/features/requests/data/repositories/requests_repository_impl.dart';
+import 'package:festeasy/features/requests/domain/repositories/requests_repository.dart';
+import 'package:festeasy/features/requests/domain/usecases/get_requests_usecase.dart';
 import 'package:festeasy/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class App extends StatefulWidget {
@@ -24,27 +31,43 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthService>.value(
-      value: _authService,
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            elevation: 1,
-            iconTheme: IconThemeData(color: Color(0xFF1F2937)),
-            titleTextStyle: TextStyle(
-              color: Color(0xFF1F2937),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFEF4444)),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepository>(
+          create: (_) => AuthRepositoryImpl(_authService),
         ),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: _appRouter.router,
+        RepositoryProvider<LoginUseCase>(
+          create: (context) => LoginUseCase(context.read<AuthRepository>()),
+        ),
+        RepositoryProvider<RequestsRepository>(
+          create: (_) => RequestsRepositoryImpl(),
+        ),
+        RepositoryProvider<GetRequestsUseCase>(
+          create: (context) => GetRequestsUseCase(context.read<RequestsRepository>()),
+        ),
+      ],
+      child: ChangeNotifierProvider<AuthService>.value(
+        value: _authService,
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              elevation: 1,
+              iconTheme: IconThemeData(color: Color(0xFF1F2937)),
+              titleTextStyle: TextStyle(
+                color: Color(0xFF1F2937),
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFEF4444)),
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: _appRouter.router,
+        ),
       ),
     );
   }

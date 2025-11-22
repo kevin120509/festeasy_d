@@ -1,27 +1,27 @@
 import 'package:festeasy/app/router/auth_service.dart';
 import 'package:festeasy/app/view/welcome_page.dart';
-import 'package:festeasy/client/auth/view/client_register_page.dart';
+import 'package:festeasy/features/auth/presentation/pages/client_register_page.dart';
 import 'package:festeasy/client/create_request/view/service_request_page.dart';
-import 'package:festeasy/client/home/view/client_home_page.dart';
-import 'package:festeasy/client/home/view/party_type_page.dart';
+import 'package:festeasy/features/home/presentation/pages/client/client_home_page.dart';
+import 'package:festeasy/features/home/presentation/pages/client/party_type_page.dart';
 import 'package:festeasy/client/payment/view/confirm_payment_page.dart';
 import 'package:festeasy/client/payment/view/proposal_detail_page.dart';
 import 'package:festeasy/client/payment/view/reservation_confirmed_page.dart';
-import 'package:festeasy/client/profile/view/client_profile_page.dart';
-import 'package:festeasy/client/requests/view/client_requests_page.dart';
-import 'package:festeasy/client/requests/view/request_detail_page.dart';
+import 'package:festeasy/features/profile/presentation/pages/client/client_profile_page.dart';
+import 'package:festeasy/features/requests/presentation/pages/client/client_requests_page.dart';
+import 'package:festeasy/features/requests/presentation/pages/client/request_detail_page.dart';
 import 'package:festeasy/dashboard/view/dashboard_page.dart';
-import 'package:festeasy/login/view/login_page.dart';
+import 'package:festeasy/features/auth/presentation/pages/login_page.dart';
 // Provider specific pages
-import 'package:festeasy/requests/view/requests_list_page.dart';
-import 'package:festeasy/requests/view/request_detail_page.dart' as provider_request_detail; // Alias to avoid conflict
-import 'package:festeasy/requests/view/send_quote_page.dart';
-import 'package:festeasy/requests/view/success_page.dart' as provider_success; // Alias
-import 'package:festeasy/profile/view/profile_page.dart' as provider_profile; // Alias
+import 'package:festeasy/features/requests/presentation/pages/requests_list_page.dart';
+import 'package:festeasy/features/requests/presentation/pages/request_detail_page.dart' as provider_request_detail; // Alias to avoid conflict
+import 'package:festeasy/features/requests/presentation/pages/send_quote_page.dart';
+import 'package:festeasy/features/requests/presentation/pages/success_page.dart' as provider_success; // Alias
+import 'package:festeasy/features/profile/presentation/pages/provider/profile_page.dart' as provider_profile; // Alias
 import 'package:festeasy/services/view/services_page.dart' as provider_services; // Alias
 import 'package:festeasy/calendar/view/calendar_page.dart' as provider_calendar; // Alias
-import 'package:festeasy/requests/view/ongoing_requests_page.dart' as provider_ongoing; // Alias
-import 'package:festeasy/profile/view/edit_profile_page.dart' as provider_edit_profile; // Alias
+import 'package:festeasy/features/requests/presentation/pages/ongoing_requests_page.dart' as provider_ongoing; // Alias
+import 'package:festeasy/features/profile/presentation/pages/provider/edit_profile_page.dart' as provider_edit_profile; // Alias
 import 'package:festeasy/chat/view/messages_list_page.dart' as provider_messages; // Alias
 import 'package:festeasy/chat/view/chat_detail_page.dart' as provider_chat_detail; // Alias
 import 'package:festeasy/settings/view/settings_page.dart' as provider_settings; // Alias

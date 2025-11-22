@@ -1,4 +1,4 @@
-import 'package:festeasy/requests/widgets/simple_header.dart';
+import 'package:festeasy/features/requests/presentation/widgets/simple_header.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {

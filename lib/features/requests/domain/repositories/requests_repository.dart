@@ -4,5 +4,6 @@ import '../entities/request.dart';
 
 abstract class RequestsRepository {
   Future<Either<Failure, List<Request>>> getRequests();
-  Future<Either<Failure, Request>> getRequestById(int id);
+  Future<Either<Failure, Request>> getRequestById(String id);
+  Future<Either<Failure, Request>> createRequest(Request request);
 }

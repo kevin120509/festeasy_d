@@ -1,52 +1,44 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../data/mock_data.dart' hide Request;
 import '../../domain/entities/request.dart';
 import '../../domain/repositories/requests_repository.dart';
-import '../models/request_model.dart';
+import '../datasources/requests_remote_datasource.dart';
 
 class RequestsRepositoryImpl implements RequestsRepository {
+  final RequestsRemoteDataSource _remoteDataSource;
+
+  RequestsRepositoryImpl(this._remoteDataSource);
+
   @override
   Future<Either<Failure, List<Request>>> getRequests() async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      final requests = MockData.mockRequests.map((e) => RequestModel(
-        id: e.id,
-        category: e.category,
-        title: e.title,
-        description: e.description,
-        date: e.date,
-        location: e.location,
-        address: e.address,
-        time: e.time,
-        guests: e.guests,
-        status: e.status,
-      )).toList();
-      return Right(requests);
+      final requests = await _remoteDataSource.getRequests();
+      return Right(List<Request>.from(requests));
     } catch (e) {
-      return const Left(ServerFailure('Failed to fetch requests'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, Request>> getRequestById(int id) async {
+  Future<Either<Failure, Request>> getRequestById(String id) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      final request = MockData.mockRequests.firstWhere((element) => element.id == id);
-      return Right(RequestModel(
-        id: request.id,
-        category: request.category,
-        title: request.title,
-        description: request.description,
-        date: request.date,
-        location: request.location,
-        address: request.address,
-        time: request.time,
-        guests: request.guests,
-        status: request.status,
-      ));
+      final requestModel = await _remoteDataSource.getRequestById(id);
+      return Right(requestModel as Request);
     } catch (e) {
-      return const Left(ServerFailure('Request not found'));
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Request>> createRequest(Request request) async {
+    try {
+      // Cast Request to dynamic to avoid type issues
+      final createdRequestModel = await _remoteDataSource.createRequest(
+        request as dynamic,
+      );
+      return Right(createdRequestModel as Request);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

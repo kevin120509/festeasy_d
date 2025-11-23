@@ -253,15 +253,16 @@ class AppRouter {
     redirect: (BuildContext context, GoRouterState state) {
       final bool isAuthenticated = authService.isAuthenticated;
       final bool isAtLoginOrWelcome = state.matchedLocation == '/' || state.matchedLocation == '/login';
+      final bool isAtRegister = state.matchedLocation == '/client/register';
 
-      // If user is authenticated and tries to access login or welcome, redirect to client home (default)
-      if (isAuthenticated && isAtLoginOrWelcome) {
+      // If user is authenticated and tries to access login, welcome, or register, redirect to client home
+      if (isAuthenticated && (isAtLoginOrWelcome || isAtRegister)) {
         return '/client/home';
       }
-      // If user is NOT authenticated and is trying to access a protected route, redirect to welcome
-      if (!isAuthenticated && !isAtLoginOrWelcome) {
-        return '/';
-      }
+      // Allow access to login, welcome, and register without authentication
+      // if (!isAuthenticated && !isAtLoginOrWelcome && !isAtRegister) {
+      //   return '/';
+      // }
       return null;
     },
   );

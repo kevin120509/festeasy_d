@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_usecase.dart';
 
 part 'login_state.dart';
@@ -21,14 +22,21 @@ class LoginCubit extends Cubit<LoginState> {
     if (state.status == LoginStatus.submissionInProgress) return;
     emit(state.copyWith(status: LoginStatus.submissionInProgress));
 
-    final result = await _loginUseCase(LoginParams(
-      email: state.email,
-      password: state.password,
-    ));
+    final result = await _loginUseCase(
+      LoginParams(
+        email: state.email,
+        password: state.password,
+      ),
+    );
 
     result.fold(
       (failure) => emit(state.copyWith(status: LoginStatus.submissionFailure)),
-      (user) => emit(state.copyWith(status: LoginStatus.submissionSuccess)),
+      (user) => emit(
+        state.copyWith(
+          status: LoginStatus.submissionSuccess,
+          user: user,
+        ),
+      ),
     );
   }
 }

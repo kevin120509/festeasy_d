@@ -33,11 +33,16 @@ class LoginForm extends StatelessWidget {
         if (state.status.isSubmissionSuccess) {
           // Set auth state first
           context.read<AuthService>().login();
-          
-          // Then navigate based on role
-          if (state.email.contains('admin') || state.email.contains('provider')) {
-            context.go('/provider/dashboard');
+
+          // Navigate based on user role
+          if (state.user != null) {
+            if (state.user!.role == 'provider') {
+              context.go('/provider/dashboard');
+            } else {
+              context.go('/client/party-type');
+            }
           } else {
+            // Fallback if user is null
             context.go('/client/party-type');
           }
         } else if (state.status.isSubmissionFailure) {
@@ -126,7 +131,7 @@ class _EmailInput extends StatelessWidget {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.email, color: Color(0xFF9CA3AF)),
-            hintText: 'ej. admin@festeasy.com o cliente@email.com',
+            hintText: 'Correo electrónico',
             fillColor: const Color(0xFFF9FAFB),
             filled: true,
             border: OutlineInputBorder(
@@ -164,7 +169,7 @@ class _PasswordInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
             ),
-             enabledBorder: OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
             ),
@@ -197,7 +202,6 @@ class _ForgotPasswordButton extends StatelessWidget {
   }
 }
 
-
 class _LoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -209,7 +213,8 @@ class _LoginButton extends StatelessWidget {
             : PrimaryButton(
                 key: const Key('loginForm_continue_raisedButton'),
                 title: 'Iniciar Sesión',
-                onPress: () => context.read<LoginCubit>().logInWithCredentials(),
+                onPress: () =>
+                    context.read<LoginCubit>().logInWithCredentials(),
               );
       },
     );
@@ -218,10 +223,31 @@ class _LoginButton extends StatelessWidget {
 
 class _RegisterLink extends StatelessWidget {
   const _RegisterLink();
-  
+
   @override
   Widget build(BuildContext context) {
-    // This could navigate to a unified register page if needed
-    return Container();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          '¿No tienes cuenta?',
+          style: TextStyle(
+            color: Color(0xFF6B7280),
+            fontSize: 14,
+          ),
+        ),
+        TextButton(
+          onPressed: () => context.go('/client/register'),
+          child: const Text(
+            'Regístrate',
+            style: TextStyle(
+              color: Color(0xFFEF4444),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

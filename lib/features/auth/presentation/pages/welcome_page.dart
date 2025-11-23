@@ -56,12 +56,12 @@ class WelcomePage extends StatelessWidget {
               // Footer Buttons
               ClientButton(
                 text: 'Crear una cuenta',
-                onPressed: () => context.push('/client/register'),
+                onPressed: () => context.go('/client/register'),
               ),
               const SizedBox(height: 16),
               ClientButton(
                 text: 'Ya tengo una cuenta',
-                onPressed: () => context.push('/client/login'),
+                onPressed: () => context.go('/login'),
               ),
               const SizedBox(height: 32),
             ],

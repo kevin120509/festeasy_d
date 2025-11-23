@@ -71,7 +71,11 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
       body: BlocListener<RegisterCubit, RegisterState>(
         listener: (context, state) {
           if (state.status.isSubmissionSuccess) {
-            context.go('/client/party-type');
+            if (state.role == 'provider') {
+              context.go('/provider/dashboard');
+            } else {
+              context.go('/client/party-type');
+            }
           } else if (state.status.isSubmissionFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
@@ -95,6 +99,30 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 40),
+              BlocBuilder<RegisterCubit, RegisterState>(
+                buildWhen: (previous, current) => previous.role != current.role,
+                builder: (context, state) {
+                  return SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment<String>(
+                        value: 'client',
+                        label: Text('Cliente'),
+                        icon: Icon(Icons.person),
+                      ),
+                      ButtonSegment<String>(
+                        value: 'provider',
+                        label: Text('Proveedor'),
+                        icon: Icon(Icons.store),
+                      ),
+                    ],
+                    selected: {state.role},
+                    onSelectionChanged: (Set<String> newSelection) {
+                      context.read<RegisterCubit>().roleChanged(newSelection.first);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
               InputGroup(
                 label: 'Nombre Completo',
                 icon: Icons.person_outline,

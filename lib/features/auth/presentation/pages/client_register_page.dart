@@ -29,6 +29,7 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _businessNameController = TextEditingController();
 
   @override
   void initState() {
@@ -45,6 +46,11 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
     _passwordController.addListener(() {
       context.read<RegisterCubit>().passwordChanged(_passwordController.text);
     });
+    _businessNameController.addListener(() {
+      context
+          .read<RegisterCubit>()
+          .businessNameChanged(_businessNameController.text);
+    });
   }
 
   @override
@@ -53,6 +59,7 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _businessNameController.dispose();
     super.dispose();
   }
 
@@ -102,23 +109,37 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
               BlocBuilder<RegisterCubit, RegisterState>(
                 buildWhen: (previous, current) => previous.role != current.role,
                 builder: (context, state) {
-                  return SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment<String>(
-                        value: 'client',
-                        label: Text('Cliente'),
-                        icon: Icon(Icons.person),
+                  return Column(
+                    children: [
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment<String>(
+                            value: 'client',
+                            label: Text('Cliente'),
+                            icon: Icon(Icons.person),
+                          ),
+                          ButtonSegment<String>(
+                            value: 'provider',
+                            label: Text('Proveedor'),
+                            icon: Icon(Icons.store),
+                          ),
+                        ],
+                        selected: {state.role},
+                        onSelectionChanged: (Set<String> newSelection) {
+                          context
+                              .read<RegisterCubit>()
+                              .roleChanged(newSelection.first);
+                        },
                       ),
-                      ButtonSegment<String>(
-                        value: 'provider',
-                        label: Text('Proveedor'),
-                        icon: Icon(Icons.store),
-                      ),
+                      if (state.role == 'provider') ...[
+                        const SizedBox(height: 24),
+                        InputGroup(
+                          label: 'Nombre del Negocio',
+                          icon: Icons.store_outlined,
+                          controller: _businessNameController,
+                        ),
+                      ],
                     ],
-                    selected: {state.role},
-                    onSelectionChanged: (Set<String> newSelection) {
-                      context.read<RegisterCubit>().roleChanged(newSelection.first);
-                    },
                   );
                 },
               ),

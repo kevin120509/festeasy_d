@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../entities/service_category.dart';
 import '../entities/user.dart';
 
 abstract class AuthRepository {
@@ -10,5 +11,9 @@ abstract class AuthRepository {
     required String password,
     required String role,
     required String phone,
+    String? businessName,
   });
+  Future<Either<Failure, List<ServiceCategory>>> getServiceCategories();
+  Future<Either<Failure, void>> createRequest(dynamic params);
+  Future<Either<Failure, Map<String, int>>> getProviderDashboardData(String providerId);
 }

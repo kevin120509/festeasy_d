@@ -9,6 +9,7 @@ class RegisterParams {
   final String password;
   final String role;
   final String phone;
+  final String businessName;
 
   RegisterParams({
     required this.name,
@@ -16,6 +17,7 @@ class RegisterParams {
     required this.password,
     required this.role,
     required this.phone,
+    this.businessName = '',
   });
 }
 
@@ -31,6 +33,7 @@ class RegisterUseCase {
       password: params.password,
       role: params.role,
       phone: params.phone,
+      businessName: params.businessName,
     );
   }
 }

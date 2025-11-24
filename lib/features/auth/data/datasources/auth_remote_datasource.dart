@@ -1,3 +1,4 @@
+import 'package:festeasy/features/auth/domain/entities/service_category.dart' as domain;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/user.dart' as domain;
 
@@ -13,6 +14,7 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String role,
     required String phone,
+    String? businessName,
   });
 
   /// Get current authenticated user
@@ -20,6 +22,15 @@ abstract class AuthRemoteDataSource {
 
   /// Sign out
   Future<void> logout();
+
+  /// Get service categories
+  Future<List<domain.ServiceCategory>> getServiceCategories();
+
+  /// Create a new service request
+  Future<void> createRequest(dynamic params);
+
+  /// Get provider dashboard data
+  Future<Map<String, int>> getProviderDashboardData(String providerId);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -51,6 +62,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: response.user!.email!,
         name: profileData['full_name'] as String,
         role: profileData['role'] as String,
+        phone: profileData['phone'] as String?,
+        avatarUrl: profileData['avatar_url'] as String?,
+        businessName: profileData['business_name'] as String?,
       );
     } catch (e) {
       throw Exception('Login error: $e');
@@ -64,6 +78,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String role,
     required String phone,
+    String? businessName,
   }) async {
     try {
       final response = await supabaseClient.auth.signUp(
@@ -73,6 +88,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'full_name': name,
           'role': role,
           'phone': phone,
+          'business_name': businessName,
         },
       );
 
@@ -92,6 +108,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: response.user!.email!,
         name: profileData['full_name'] as String,
         role: profileData['role'] as String,
+        phone: profileData['phone'] as String?,
+        avatarUrl: profileData['avatar_url'] as String?,
+        businessName: profileData['business_name'] as String?,
       );
     } catch (e) {
       throw Exception('Registration error: $e');
@@ -117,6 +136,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: user.email!,
         name: profileData['full_name'] as String,
         role: profileData['role'] as String,
+        phone: profileData['phone'] as String?,
+        avatarUrl: profileData['avatar_url'] as String?,
+        businessName: profileData['business_name'] as String?,
       );
     } catch (e) {
       return null;
@@ -126,5 +148,63 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await supabaseClient.auth.signOut();
+  }
+
+  @override
+  Future<List<domain.ServiceCategory>> getServiceCategories() async {
+    try {
+      final response = await supabaseClient.from('service_categories').select();
+      return (response as List)
+          .map((e) => domain.ServiceCategory(
+                id: e['id'] as String,
+                name: e['name'] as String,
+                description: e['description'] as String?,
+                icon: e['icon'] as String?,
+              ))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get service categories: $e');
+    }
+  }
+
+  @override
+  Future<void> createRequest(params) async {
+    try {
+      await supabaseClient.from('requests').insert({
+        'title': params.title,
+        'description': params.description,
+        'category_id': params.categoryId,
+        'event_date': params.eventDate.toIso8601String(),
+        'event_time': params.eventTime,
+        'location': params.location,
+        'guest_count': params.guestCount,
+        'client_id': params.clientId,
+      });
+    } catch (e) {
+      throw Exception('Failed to create request: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, int>> getProviderDashboardData(String providerId) async {
+    try {
+      final newRequests = await supabaseClient
+          .from('requests')
+          .select('id')
+          .eq('status', 'open');
+
+      final ongoingRequests = await supabaseClient
+          .from('quotes')
+          .select('id')
+          .eq('provider_id', providerId)
+          .eq('status', 'pending');
+
+      return {
+        'newRequestsCount': (newRequests as List).length,
+        'ongoingRequestsCount': (ongoingRequests as List).length,
+      };
+    } catch (e) {
+      throw Exception('Failed to get dashboard data: $e');
+    }
   }
 }

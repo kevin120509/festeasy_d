@@ -30,6 +30,10 @@ class RegisterCubit extends Cubit<RegisterState> {
     emit(state.copyWith(role: value, status: RegisterStatus.pure));
   }
 
+  void businessNameChanged(String value) {
+    emit(state.copyWith(businessName: value, status: RegisterStatus.pure));
+  }
+
   Future<void> registerWithCredentials() async {
     if (state.status == RegisterStatus.submissionInProgress) return;
     emit(state.copyWith(status: RegisterStatus.submissionInProgress));
@@ -41,6 +45,7 @@ class RegisterCubit extends Cubit<RegisterState> {
         password: state.password,
         role: state.role,
         phone: state.phone,
+        businessName: state.businessName,
       ),
     );
 

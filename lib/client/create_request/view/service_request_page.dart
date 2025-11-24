@@ -1,17 +1,92 @@
+import 'package:festeasy/client/create_request/cubit/service_request_cubit.dart';
+import 'package:festeasy/client/create_request/domain/usecases/create_request_usecase.dart';
+import 'package:festeasy/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:festeasy/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:festeasy/features/auth/domain/entities/service_category.dart';
+import 'package:festeasy/features/auth/domain/usecases/get_service_categories_usecase.dart';
 import 'package:festeasy/shared/widgets/client_components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ServiceRequestPage extends StatefulWidget {
+class ServiceRequestPage extends StatelessWidget {
   const ServiceRequestPage({super.key});
 
   @override
-  State<ServiceRequestPage> createState() => _ServiceRequestPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ServiceRequestCubit(
+        CreateRequestUseCase(
+          AuthRepositoryImpl(
+            AuthRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        ),
+        GetServiceCategoriesUseCase(
+          AuthRepositoryImpl(
+            AuthRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        ),
+      ),
+      child: const ServiceRequestView(),
+    );
+  }
 }
 
-class _ServiceRequestPageState extends State<ServiceRequestPage> {
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
+class ServiceRequestView extends StatefulWidget {
+  const ServiceRequestView({super.key});
+
+  @override
+  State<ServiceRequestView> createState() => _ServiceRequestViewState();
+}
+
+class _ServiceRequestViewState extends State<ServiceRequestView> {
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _guestCountController = TextEditingController();
+
+  List<ServiceCategory> _categories = [];
+  String? _selectedCategory;
+  TimeOfDay? _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+    _titleController.addListener(() {
+      context.read<ServiceRequestCubit>().titleChanged(_titleController.text);
+    });
+    _descriptionController.addListener(() {
+      context
+          .read<ServiceRequestCubit>()
+          .descriptionChanged(_descriptionController.text);
+    });
+    _locationController.addListener(() {
+      context
+          .read<ServiceRequestCubit>()
+          .locationChanged(_locationController.text);
+    });
+    _guestCountController.addListener(() {
+      context
+          .read<ServiceRequestCubit>()
+          .guestCountChanged(int.tryParse(_guestCountController.text) ?? 0);
+    });
+  }
+
+  Future<void> _fetchCategories() async {
+    final categories =
+        await context.read<ServiceRequestCubit>().getServiceCategories();
+    setState(() {
+      _categories = categories;
+    });
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -24,6 +99,7 @@ class _ServiceRequestPageState extends State<ServiceRequestPage> {
       setState(() {
         _dateController.text = '${picked.day}/${picked.month}/${picked.year}';
       });
+      context.read<ServiceRequestCubit>().dateChanged(picked);
     }
   }
 
@@ -35,8 +111,21 @@ class _ServiceRequestPageState extends State<ServiceRequestPage> {
     if (picked != null) {
       setState(() {
         _timeController.text = picked.format(context);
+        _selectedTime = picked;
       });
+      context.read<ServiceRequestCubit>().timeChanged(picked);
     }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _dateController.dispose();
+    _timeController.dispose();
+    _locationController.dispose();
+    _guestCountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,69 +139,160 @@ class _ServiceRequestPageState extends State<ServiceRequestPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Describe tu evento', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: const Text('Describe tu evento',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Descripción',
-              style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF374151)),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'Ej: Necesito un servicio de fotografía profesional para una boda de 6 horas, con entrega de 300 fotos editadas y un álbum digital.',
-                filled: true,
-                fillColor: const Color(0xFFF3F4F6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+      body: BlocListener<ServiceRequestCubit, ServiceRequestState>(
+        listener: (context, state) {
+          if (state.status.isSubmissionSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(content: Text('Request Created Successfully')),
+              );
+            context.go('/client/requests');
+          } else if (state.status.isSubmissionFailure) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(content: Text('Request Creation Failed')),
+              );
+          }
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Title',
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  hintText: 'Ej: Boda de 200 personas',
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: InputGroup(
-                    label: 'Fecha',
-                    icon: Icons.calendar_today,
-                    controller: _dateController,
-                    keyboardType: TextInputType.datetime,
+              const SizedBox(height: 24),
+              const Text(
+                'Descripción',
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  hintText:
+                      'Ej: Necesito un servicio de fotografía profesional para una boda de 6 horas, con entrega de 300 fotos editadas y un álbum digital.',
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: InputGroup(
-                    label: 'Hora',
-                    icon: Icons.access_time,
-                    controller: _timeController,
-                    keyboardType: TextInputType.datetime,
+              ),
+              const SizedBox(height: 24),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                items: _categories
+                    .map((category) => DropdownMenuItem(
+                          value: category.id,
+                          child: Text(category.name),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                  context.read<ServiceRequestCubit>().categoryIdChanged(value!);
+                },
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const InputGroup(
-              label: 'Ubicación',
-              icon: Icons.location_on,
-            ),
-            const SizedBox(height: 24),
-            InputGroup(
-              label: 'Invitados',
-              icon: Icons.people,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 40),
-            ClientButton(
-              text: 'Enviar Solicitud',
-              onPressed: () => context.go('/client/requests'), // Navigates to client requests list
-            ),
-          ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _selectDate(context),
+                      child: AbsorbPointer(
+                        child: InputGroup(
+                          label: 'Fecha',
+                          icon: Icons.calendar_today,
+                          controller: _dateController,
+                          keyboardType: TextInputType.datetime,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _selectTime(context),
+                      child: AbsorbPointer(
+                        child: InputGroup(
+                          label: 'Hora',
+                          icon: Icons.access_time,
+                          controller: _timeController,
+                          keyboardType: TextInputType.datetime,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              InputGroup(
+                label: 'Ubicación',
+                icon: Icons.location_on,
+                controller: _locationController,
+              ),
+              const SizedBox(height: 24),
+              InputGroup(
+                label: 'Invitados',
+                icon: Icons.people,
+                keyboardType: TextInputType.number,
+                controller: _guestCountController,
+              ),
+              const SizedBox(height: 40),
+              BlocBuilder<ServiceRequestCubit, ServiceRequestState>(
+                builder: (context, state) {
+                  return state.status.isSubmissionInProgress
+                      ? const Center(child: CircularProgressIndicator())
+                      : ClientButton(
+                          text: 'Enviar Solicitud',
+                          onPressed: () {
+                            final user =
+                                Supabase.instance.client.auth.currentUser;
+                            if (user != null && _selectedTime != null) {
+                              context.read<ServiceRequestCubit>().submitRequest(
+                                  user.id, _selectedTime!.format(context));
+                            }
+                          },
+                        );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

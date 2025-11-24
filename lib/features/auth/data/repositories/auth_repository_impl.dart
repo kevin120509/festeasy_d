@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/service_category.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -25,6 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String role,
     required String phone,
+    String? businessName,
   }) async {
     try {
       return Right(
@@ -34,8 +36,38 @@ class AuthRepositoryImpl implements AuthRepository {
           password: password,
           role: role,
           phone: phone,
+          businessName: businessName,
         ),
       );
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ServiceCategory>>> getServiceCategories() async {
+    try {
+      return Right(await _remoteDataSource.getServiceCategories());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> createRequest(params) async {
+    try {
+      return Right(await _remoteDataSource.createRequest(params));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, int>>> getProviderDashboardData(
+      String providerId) async {
+    try {
+      return Right(
+          await _remoteDataSource.getProviderDashboardData(providerId));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

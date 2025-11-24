@@ -20,3 +20,7 @@ class CacheFailure extends Failure {
 class EmailConfirmationFailure extends Failure {
   const EmailConfirmationFailure(String message) : super(message);
 }
+
+class UserAlreadyRegisteredFailure extends Failure {
+  const UserAlreadyRegisteredFailure(String message) : super(message);
+}

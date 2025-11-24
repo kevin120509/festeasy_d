@@ -110,6 +110,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       if (e is EmailConfirmationRequiredException) {
         rethrow;
+      } else if (e is AuthApiException &&
+          e.statusCode == '422' &&
+          e.message.contains('User already registered')) {
+        throw UserAlreadyRegisteredException();
       }
       throw Exception('Registration error: $e');
     }

@@ -90,6 +90,7 @@ class InputGroup extends StatelessWidget {
     this.isPassword = false,
     this.controller,
     this.keyboardType,
+    this.validator,
   });
 
   final String label;
@@ -97,6 +98,7 @@ class InputGroup extends StatelessWidget {
   final bool isPassword;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final FormFieldValidator<String>? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +117,7 @@ class InputGroup extends StatelessWidget {
           controller: controller,
           obscureText: isPassword,
           keyboardType: keyboardType,
+          validator: validator,
           decoration: InputDecoration(
             prefixIcon: icon != null
                 ? Icon(icon, color: const Color(0xFF9CA3AF))

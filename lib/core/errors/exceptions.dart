@@ -8,3 +8,14 @@ class EmailConfirmationRequiredException implements Exception {
   @override
   String toString() => message;
 }
+
+class UserAlreadyRegisteredException implements Exception {
+  final String message;
+
+  UserAlreadyRegisteredException({
+    this.message = 'User already registered. Please login.',
+  });
+
+  @override
+  String toString() => message;
+}

@@ -58,6 +58,12 @@ class RegisterCubit extends Cubit<RegisterState> {
               status: RegisterStatus.submissionSuccessEmailConfirmationNeeded,
             ),
           );
+        } else if (failure is UserAlreadyRegisteredFailure) {
+          emit(
+            state.copyWith(
+              status: RegisterStatus.submissionFailureUserAlreadyRegistered,
+            ),
+          );
         } else {
           emit(state.copyWith(status: RegisterStatus.submissionFailure));
         }

@@ -95,6 +95,22 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                 ),
               );
             context.go('/login');
+          } else if (state.status.isSubmissionFailureUserAlreadyRegistered) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    'User already registered. Please login.',
+                  ),
+                  action: SnackBarAction(
+                    label: 'Login',
+                    onPressed: () {
+                      context.go('/login');
+                    },
+                  ),
+                ),
+              );
           } else if (state.status.isSubmissionFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
@@ -170,6 +186,17 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   controller: _emailController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tu correo electrónico';
+                    }
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
+                      return 'Ingresa un correo electrónico válido';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
                 InputGroup(
@@ -184,6 +211,15 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                   icon: Icons.lock_outlined,
                   isPassword: true,
                   controller: _passwordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tu contraseña';
+                    }
+                    if (value.length < 6) {
+                      return 'La contraseña debe tener al menos 6 caracteres';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 40),
                 BlocBuilder<RegisterCubit, RegisterState>(

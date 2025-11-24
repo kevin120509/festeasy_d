@@ -42,6 +42,8 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on EmailConfirmationRequiredException catch (e) {
       return Left(EmailConfirmationFailure(e.message));
+    } on UserAlreadyRegisteredException catch (e) {
+      return Left(UserAlreadyRegisteredFailure(e.message));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

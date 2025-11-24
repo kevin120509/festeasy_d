@@ -6,6 +6,7 @@ enum RegisterStatus {
   submissionSuccess,
   submissionFailure,
   submissionSuccessEmailConfirmationNeeded,
+  submissionFailureUserAlreadyRegistered,
 }
 
 extension RegisterStatusX on RegisterStatus {
@@ -15,6 +16,8 @@ extension RegisterStatusX on RegisterStatus {
   bool get isSubmissionFailure => this == RegisterStatus.submissionFailure;
   bool get isSubmissionSuccessEmailConfirmationNeeded =>
       this == RegisterStatus.submissionSuccessEmailConfirmationNeeded;
+  bool get isSubmissionFailureUserAlreadyRegistered =>
+      this == RegisterStatus.submissionFailureUserAlreadyRegistered;
 }
 
 class RegisterState extends Equatable {

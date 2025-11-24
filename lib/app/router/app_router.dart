@@ -14,19 +14,29 @@ import 'package:festeasy/dashboard/view/dashboard_page.dart';
 import 'package:festeasy/features/auth/presentation/pages/login_page.dart';
 // Provider specific pages
 import 'package:festeasy/features/requests/presentation/pages/requests_list_page.dart';
-import 'package:festeasy/features/requests/presentation/pages/request_detail_page.dart' as provider_request_detail; // Alias to avoid conflict
+import 'package:festeasy/features/requests/presentation/pages/request_detail_page.dart'
+    as provider_request_detail; // Alias to avoid conflict
 import 'package:festeasy/features/requests/presentation/pages/send_quote_page.dart';
-import 'package:festeasy/features/requests/presentation/pages/success_page.dart' as provider_success; // Alias
-import 'package:festeasy/features/profile/presentation/pages/provider/profile_page.dart' as provider_profile; // Alias
-import 'package:festeasy/services/view/services_page.dart' as provider_services; // Alias
-import 'package:festeasy/calendar/view/calendar_page.dart' as provider_calendar; // Alias
-import 'package:festeasy/features/requests/presentation/pages/ongoing_requests_page.dart' as provider_ongoing; // Alias
-import 'package:festeasy/features/profile/presentation/pages/provider/edit_profile_page.dart' as provider_edit_profile; // Alias
-import 'package:festeasy/chat/view/messages_list_page.dart' as provider_messages; // Alias
-import 'package:festeasy/chat/view/chat_detail_page.dart' as provider_chat_detail; // Alias
-import 'package:festeasy/settings/view/settings_page.dart' as provider_settings; // Alias
-import 'package:festeasy/calendar/view/confirmed_event_page.dart' as provider_confirmed_event; // Alias
-
+import 'package:festeasy/features/requests/presentation/pages/success_page.dart'
+    as provider_success; // Alias
+import 'package:festeasy/features/profile/presentation/pages/provider/profile_page.dart'
+    as provider_profile; // Alias
+import 'package:festeasy/services/view/services_page.dart'
+    as provider_services; // Alias
+import 'package:festeasy/calendar/view/calendar_page.dart'
+    as provider_calendar; // Alias
+import 'package:festeasy/features/requests/presentation/pages/ongoing_requests_page.dart'
+    as provider_ongoing; // Alias
+import 'package:festeasy/features/profile/presentation/pages/provider/edit_profile_page.dart'
+    as provider_edit_profile; // Alias
+import 'package:festeasy/chat/view/messages_list_page.dart'
+    as provider_messages; // Alias
+import 'package:festeasy/chat/view/chat_detail_page.dart'
+    as provider_chat_detail; // Alias
+import 'package:festeasy/settings/view/settings_page.dart'
+    as provider_settings; // Alias
+import 'package:festeasy/calendar/view/confirmed_event_page.dart'
+    as provider_confirmed_event; // Alias
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +59,8 @@ class AppRouter {
       // --- Unified Login ---
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginPage(), // The unified login page
+        builder: (context, state) =>
+            const LoginPage(), // The unified login page
       ),
 
       // --- PROVIDER FLOW ---
@@ -64,12 +75,14 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: ':id', // /provider/dashboard/requests/:id
-                builder: (context, state) => provider_request_detail.RequestDetailPage(
-                  requestId: state.pathParameters['id']!,
-                ),
+                builder: (context, state) =>
+                    provider_request_detail.RequestDetailPage(
+                      requestId: state.pathParameters['id']!,
+                    ),
                 routes: [
                   GoRoute(
-                    path: 'send-quote', // /provider/dashboard/requests/:id/send-quote
+                    path:
+                        'send-quote', // /provider/dashboard/requests/:id/send-quote
                     builder: (context, state) => SendQuotePage(
                       requestId: state.pathParameters['id']!,
                     ),
@@ -90,7 +103,8 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: 'edit', // /provider/dashboard/profile/edit
-                builder: (context, state) => const provider_edit_profile.EditProfilePage(),
+                builder: (context, state) =>
+                    const provider_edit_profile.EditProfilePage(),
               ),
             ],
           ),
@@ -105,28 +119,33 @@ class AppRouter {
             builder: (context, state) => const provider_calendar.CalendarPage(),
             routes: [
               GoRoute(
-                path: 'events/:eventId', // /provider/dashboard/calendar/events/:eventId
-                builder: (context, state) => provider_confirmed_event.ConfirmedEventPage(
-                  eventId: state.pathParameters['eventId']!,
-                ),
+                path:
+                    'events/:eventId', // /provider/dashboard/calendar/events/:eventId
+                builder: (context, state) =>
+                    provider_confirmed_event.ConfirmedEventPage(
+                      eventId: state.pathParameters['eventId']!,
+                    ),
               ),
             ],
           ),
           // Ongoing Requests
           GoRoute(
             path: 'ongoing-requests', // /provider/dashboard/ongoing-requests
-            builder: (context, state) => const provider_ongoing.OngoingRequestsPage(),
+            builder: (context, state) =>
+                const provider_ongoing.OngoingRequestsPage(),
           ),
           // Messages
           GoRoute(
             path: 'messages', // /provider/dashboard/messages
-            builder: (context, state) => const provider_messages.MessagesListPage(), // Corrected name
+            builder: (context, state) =>
+                const provider_messages.MessagesListPage(), // Corrected name
             routes: [
               GoRoute(
                 path: ':chatId', // /provider/dashboard/messages/:chatId
-                builder: (context, state) => provider_chat_detail.ChatDetailPage(
-                  chatId: state.pathParameters['chatId']!,
-                ),
+                builder: (context, state) =>
+                    provider_chat_detail.ChatDetailPage(
+                      chatId: state.pathParameters['chatId']!,
+                    ),
               ),
             ],
           ),
@@ -161,7 +180,7 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
       ),
-       GoRoute(
+      GoRoute(
         path: '/client/home',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
@@ -184,21 +203,23 @@ class AppRouter {
         ),
       ),
       GoRoute(
-          path: '/client/requests',
-          pageBuilder: (context, state) => CustomTransitionPage<void>(
-            key: state.pageKey,
-            child: const ClientRequestsPage(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
+        path: '/client/requests',
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const ClientRequestsPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
       ),
       GoRoute(
         path: '/client/request-detail/:id',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
-          child: ClientRequestDetailPage(requestId: state.pathParameters['id']!),
+          child: ClientRequestDetailPage(
+            requestId: state.pathParameters['id']!,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
@@ -238,7 +259,8 @@ class AppRouter {
           transitionDuration: const Duration(milliseconds: 300),
         ),
       ),
-      GoRoute( // Client profile route
+      GoRoute(
+        // Client profile route
         path: '/client/profile',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
@@ -252,7 +274,8 @@ class AppRouter {
     ],
     redirect: (BuildContext context, GoRouterState state) {
       final bool isAuthenticated = authService.isAuthenticated;
-      final bool isAtLoginOrWelcome = state.matchedLocation == '/' || state.matchedLocation == '/login';
+      final bool isAtLoginOrWelcome =
+          state.matchedLocation == '/' || state.matchedLocation == '/login';
       final bool isAtRegister = state.matchedLocation == '/client/register';
 
       // If user is authenticated and tries to access login, welcome, or register, redirect to client home

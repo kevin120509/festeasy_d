@@ -27,15 +27,15 @@ class Request extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        category,
-        title,
-        description,
-        date,
-        location,
-        address,
-        time,
-        guests,
-        status,
-      ];
+    id,
+    category,
+    title,
+    description,
+    date,
+    location,
+    address,
+    time,
+    guests,
+    status,
+  ];
 }

@@ -78,13 +78,19 @@ class _RequestListItem extends StatelessWidget {
                     color: const Color(0xFFEF4444),
                     bg: const Color(0xFFFEF2F2),
                   ),
-                  const Text('Hace 2h', style: TextStyle(color: Color(0xFF6B7280), fontSize: 12)),
+                  const Text(
+                    'Hace 2h',
+                    style: TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 request.title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -96,16 +102,33 @@ class _RequestListItem extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 14, color: Color(0xFF6B7280)),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: Color(0xFF6B7280),
+                  ),
                   const SizedBox(width: 4),
-                  Text(request.date, style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12)),
+                  Text(
+                    request.date,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  const Icon(Icons.pin_drop, size: 14, color: Color(0xFF6B7280)),
+                  const Icon(
+                    Icons.pin_drop,
+                    size: 14,
+                    color: Color(0xFF6B7280),
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       request.location,
-                      style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+                      style: const TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 12,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -118,7 +141,9 @@ class _RequestListItem extends StatelessWidget {
                   width: 120,
                   child: PrimaryButton(
                     title: 'Revisar',
-                    onPress: () => context.push('/provider/dashboard/requests/${request.id}'),
+                    onPress: () => context.push(
+                      '/provider/dashboard/requests/${request.id}',
+                    ),
                   ),
                 ),
               ),

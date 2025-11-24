@@ -35,26 +35,45 @@ class ReservationConfirmedPage extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               Container(
-                 padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF9FAFB),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                 child: Column(
-                   children: [
-                     const Text('Boda en Playa del Carmen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                     const SizedBox(height: 8),
-                     const Text('20 de Diciembre, 2024', style: TextStyle(color: Colors.grey)),
-                      const Divider(height: 32),
-                      ClientButton(text: 'Contactar al Proveedor', isOutline: true, onPressed: (){}),
-                      const SizedBox(height: 12),
-                      ClientButton(text: 'Ver comprobante', isOutline: true, onPressed: (){}),
-                   ],
-                 ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Boda en Playa del Carmen',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '20 de Diciembre, 2024',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const Divider(height: 32),
+                    ClientButton(
+                      text: 'Contactar al Proveedor',
+                      isOutline: true,
+                      onPressed: () {},
+                    ),
+                    const SizedBox(height: 12),
+                    ClientButton(
+                      text: 'Ver comprobante',
+                      isOutline: true,
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
               ),
-               const Spacer(),
-              ClientButton(text: 'Volver al Inicio', onPressed: ()=> context.go('/client/home')),
-
+              const Spacer(),
+              ClientButton(
+                text: 'Volver al Inicio',
+                onPressed: () => context.go('/client/home'),
+              ),
             ],
           ),
         ),

@@ -20,7 +20,10 @@ class CalendarPage extends StatelessWidget {
           children: [
             _CalendarHeader(),
             const SizedBox(height: 16),
-            _CalendarGrid(eventDay: 15, event: event), // Mocking event on day 15
+            _CalendarGrid(
+              eventDay: 15,
+              event: event,
+            ), // Mocking event on day 15
             const SizedBox(height: 24),
             _EventList(event: event),
           ],
@@ -51,7 +54,7 @@ class _CalendarHeader extends StatelessWidget {
               onPressed: () {},
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -77,7 +80,10 @@ class _CalendarGrid extends StatelessWidget {
           return Center(
             child: Text(
               daysOfWeek[index],
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
           );
         }
@@ -119,7 +125,7 @@ class _EventList extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Card(
-           child: InkWell(
+          child: InkWell(
             onTap: () => context.push('/calendar/${event.id}'),
             borderRadius: BorderRadius.circular(16),
             child: Padding(
@@ -132,7 +138,10 @@ class _EventList extends StatelessWidget {
                       color: const Color(0xFFFEF2F2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.calendar_today, color: Color(0xFFEF4444)),
+                    child: const Icon(
+                      Icons.calendar_today,
+                      color: Color(0xFFEF4444),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -141,17 +150,23 @@ class _EventList extends StatelessWidget {
                       children: [
                         Text(
                           event.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${event.date} - ${event.time}',
-                          style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                   const Icon(Icons.chevron_right, color: Colors.grey),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
                 ],
               ),
             ),

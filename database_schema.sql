@@ -464,26 +464,32 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Apply updated_at trigger to relevant tables
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_events_updated_at ON events;
 CREATE TRIGGER update_events_updated_at
     BEFORE UPDATE ON events
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_requests_updated_at ON requests;
 CREATE TRIGGER update_requests_updated_at
     BEFORE UPDATE ON requests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_services_updated_at ON services;
 CREATE TRIGGER update_services_updated_at
     BEFORE UPDATE ON services
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_quotes_updated_at ON quotes;
 CREATE TRIGGER update_quotes_updated_at
     BEFORE UPDATE ON quotes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_hired_services_updated_at ON hired_services;
 CREATE TRIGGER update_hired_services_updated_at
     BEFORE UPDATE ON hired_services
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -492,18 +498,21 @@ CREATE TRIGGER update_hired_services_updated_at
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, email, full_name, role)
+    INSERT INTO public.profiles (id, email, full_name, role, phone, business_name)
     VALUES (
         NEW.id,
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'full_name', 'Usuario'),
-        COALESCE(NEW.raw_user_meta_data->>'role', 'client')
+        COALESCE(NEW.raw_user_meta_data->>'role', 'client'),
+        NEW.raw_user_meta_data->>'phone',
+        NEW.raw_user_meta_data->>'business_name'
     );
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to create profile on user signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION handle_new_user();
@@ -520,6 +529,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to update request status when quote is created
+DROP TRIGGER IF EXISTS on_quote_created ON quotes;
 CREATE TRIGGER on_quote_created
     AFTER INSERT ON quotes
     FOR EACH ROW EXECUTE FUNCTION update_request_status_on_quote();
@@ -560,6 +570,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to create hired service on quote acceptance
+DROP TRIGGER IF EXISTS on_quote_accepted ON quotes;
 CREATE TRIGGER on_quote_accepted
     AFTER UPDATE ON quotes
     FOR EACH ROW EXECUTE FUNCTION create_hired_service_on_acceptance();
@@ -582,6 +593,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to update event budget when hired service is added
+DROP TRIGGER IF EXISTS on_hired_service_added ON hired_services;
 CREATE TRIGGER on_hired_service_added
     AFTER INSERT ON hired_services
     FOR EACH ROW EXECUTE FUNCTION update_event_total_budget();

@@ -13,17 +13,31 @@ class EditProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildTextField(label: 'Nombre del Negocio', initialValue: 'FestaFusion Catering'),
+            _buildTextField(
+              label: 'Nombre del Negocio',
+              initialValue: 'FestaFusion Catering',
+            ),
             const SizedBox(height: 16),
-            _buildTextField(label: 'Correo de Contacto', initialValue: 'contacto@festafusion.com'),
+            _buildTextField(
+              label: 'Correo de Contacto',
+              initialValue: 'contacto@festafusion.com',
+            ),
             const SizedBox(height: 16),
-            _buildTextField(label: 'Teléfono', initialValue: '+52 999 123 4567'),
-             const SizedBox(height: 16),
-            _buildTextField(label: 'Descripción Corta', initialValue: 'Expertos en catering para bodas y eventos corporativos.', maxLines: 3),
+            _buildTextField(
+              label: 'Teléfono',
+              initialValue: '+52 999 123 4567',
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Descripción Corta',
+              initialValue:
+                  'Expertos en catering para bodas y eventos corporativos.',
+              maxLines: 3,
+            ),
           ],
-        )
+        ),
       ),
-       bottomNavigationBar: Padding(
+      bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16).copyWith(bottom: 32),
         child: PrimaryButton(
           title: 'Guardar Cambios',
@@ -35,12 +49,19 @@ class EditProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField({required String label, required String initialValue, int maxLines = 1}) {
+  Widget _buildTextField({
+    required String label,
+    required String initialValue,
+    int maxLines = 1,
+  }) {
     return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-         const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 8),
         TextFormField(
           initialValue: initialValue,
           maxLines: maxLines,

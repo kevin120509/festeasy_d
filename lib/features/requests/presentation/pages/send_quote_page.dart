@@ -30,15 +30,23 @@ class _SendQuotePageState extends State<SendQuotePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Monto', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Monto',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               style: const TextStyle(fontSize: 18),
               decoration: InputDecoration(
                 prefixText: r'$ ',
-                prefixStyle: const TextStyle(fontSize: 18, color: Color(0xFF9CA3AF)),
+                prefixStyle: const TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF9CA3AF),
+                ),
                 hintText: '0.00',
                 filled: true,
                 fillColor: Colors.white,
@@ -49,7 +57,10 @@ class _SendQuotePageState extends State<SendQuotePage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Descripción',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _descriptionController,
@@ -65,7 +76,10 @@ class _SendQuotePageState extends State<SendQuotePage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Servicios incluidos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Servicios incluidos',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 8),
             ..._services.keys.map((service) {
               return _CheckboxRow(

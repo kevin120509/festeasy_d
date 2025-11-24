@@ -16,10 +16,12 @@ class RequestsCubit extends Cubit<RequestsState> {
     final result = await _getRequestsUseCase(NoParams());
     result.fold(
       (failure) => emit(state.copyWith(status: RequestsStatus.failure)),
-      (requests) => emit(state.copyWith(
-        status: RequestsStatus.success,
-        requests: requests,
-      )),
+      (requests) => emit(
+        state.copyWith(
+          status: RequestsStatus.success,
+          requests: requests,
+        ),
+      ),
     );
   }
 }

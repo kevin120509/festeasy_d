@@ -17,7 +17,10 @@ class _ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Confirmar Reservación', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Confirmar Reservación',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -30,7 +33,10 @@ class _ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Resumen del Servicio', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              'Resumen del Servicio',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(20),
@@ -41,14 +47,20 @@ class _ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               child: Column(
                 children: [
                   _buildSummaryRow('Proveedor', 'Eventos Mágicos'),
-                  _buildSummaryRow('Servicio', 'Decoración y Catering para Boda'),
+                  _buildSummaryRow(
+                    'Servicio',
+                    'Decoración y Catering para Boda',
+                  ),
                   const Divider(height: 32),
                   _buildSummaryRow('Monto Total', '\$2,500.00', isTotal: true),
                 ],
               ),
             ),
             const SizedBox(height: 32),
-            const Text('Método de Pago', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              'Método de Pago',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             _PaymentMethodSelector(
               icon: Icons.credit_card,

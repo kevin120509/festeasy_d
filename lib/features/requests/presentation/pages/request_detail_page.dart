@@ -34,17 +34,26 @@ class RequestDetailPage extends StatelessWidget {
                     SizedBox(width: 8),
                     Text(
                       'DESCRIPCIÓN DEL CLIENTE',
-                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   request.title,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text(request.description, style: const TextStyle(fontSize: 16, height: 1.5)),
+                Text(
+                  request.description,
+                  style: const TextStyle(fontSize: 16, height: 1.5),
+                ),
                 const Divider(height: 40),
                 _InfoRow(
                   icon: Icons.calendar_today,
@@ -102,10 +111,19 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 2),
-                Text(text, style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
               ],
             ),
           ),

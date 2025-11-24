@@ -15,5 +15,7 @@ abstract class AuthRepository {
   });
   Future<Either<Failure, List<ServiceCategory>>> getServiceCategories();
   Future<Either<Failure, void>> createRequest(dynamic params);
-  Future<Either<Failure, Map<String, int>>> getProviderDashboardData(String providerId);
+  Future<Either<Failure, Map<String, int>>> getProviderDashboardData(
+    String providerId,
+  );
 }

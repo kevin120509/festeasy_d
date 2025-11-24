@@ -12,7 +12,8 @@ class MessagesListPage extends StatelessWidget {
       appBar: const SimpleHeader(title: 'Mensajes'),
       body: ListView.separated(
         itemCount: MockData.mockChats.length,
-        separatorBuilder: (context, index) => const Divider(height: 1, indent: 80),
+        separatorBuilder: (context, index) =>
+            const Divider(height: 1, indent: 80),
         itemBuilder: (context, index) {
           final chat = MockData.mockChats[index];
           return _ChatListItem(chat: chat);
@@ -36,7 +37,10 @@ class _ChatListItem extends StatelessWidget {
         // A simple avatar with initials
         child: Text(chat.userName.substring(0, 2).toUpperCase()),
       ),
-      title: Text(chat.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        chat.userName,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
       subtitle: Text(
         chat.lastMessage,
         maxLines: 1,
@@ -46,7 +50,10 @@ class _ChatListItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(chat.time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(
+            chat.time,
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
+          ),
           const SizedBox(height: 4),
           if (chat.unread > 0)
             Container(

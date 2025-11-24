@@ -11,21 +11,43 @@ class ClientRequestDetailPage extends StatelessWidget {
     // Mock data for demonstration
     final requestDetails = {
       'category': 'Fotografía de Eventos',
-      'description': 'Necesito un fotógrafo profesional para un evento corporativo de 4 horas. Cubrir la ceremonia de premiación y el cóctel posterior. Se requieren 200 fotos editadas en alta resolución.',
+      'description':
+          'Necesito un fotógrafo profesional para un evento corporativo de 4 horas. Cubrir la ceremonia de premiación y el cóctel posterior. Se requieren 200 fotos editadas en alta resolución.',
       'location': 'Hotel Gran Plaza, Ciudad de México',
       'date': '18 de Noviembre, 2025',
       'guests': '100',
     };
     final proposals = [
-      {'id': '1', 'provider': 'FotoPro Eventos', 'rating': 4.9, 'price': 1800.0},
-      {'id': '2', 'provider': 'Captura Momentos SA', 'rating': 4.7, 'price': 1500.0},
-      {'id': '3', 'provider': 'Lente Mágico Estudio', 'rating': 5.0, 'price': 2000.0},
+      {
+        'id': '1',
+        'provider': 'FotoPro Eventos',
+        'rating': 4.9,
+        'price': 1800.0,
+      },
+      {
+        'id': '2',
+        'provider': 'Captura Momentos SA',
+        'rating': 4.7,
+        'price': 1500.0,
+      },
+      {
+        'id': '3',
+        'provider': 'Lente Mágico Estudio',
+        'rating': 5.0,
+        'price': 2000.0,
+      },
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text(requestDetails['category']!, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text(
+          requestDetails['category']!,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
@@ -48,18 +70,39 @@ class ClientRequestDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('DETALLES DE TU SOLICITUD', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'DETALLES DE TU SOLICITUD',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(requestDetails['description']!, style: const TextStyle(fontSize: 16, height: 1.5)),
+                  Text(
+                    requestDetails['description']!,
+                    style: const TextStyle(fontSize: 16, height: 1.5),
+                  ),
                   const Divider(height: 32),
-                  _InfoRow(icon: Icons.pin_drop, text: requestDetails['location']!),
-                  _InfoRow(icon: Icons.calendar_today, text: requestDetails['date']!),
-                  _InfoRow(icon: Icons.people, text: '${requestDetails['guests']} invitados'),
+                  _InfoRow(
+                    icon: Icons.pin_drop,
+                    text: requestDetails['location']!,
+                  ),
+                  _InfoRow(
+                    icon: Icons.calendar_today,
+                    text: requestDetails['date']!,
+                  ),
+                  _InfoRow(
+                    icon: Icons.people,
+                    text: '${requestDetails['guests']} invitados',
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
-            const Text('Propuestas Recibidas', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              'Propuestas Recibidas',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             // Proposals List
             ListView.separated(
@@ -91,7 +134,10 @@ class _InfoRow extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFFEF4444)),
           const SizedBox(width: 12),
-          Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -117,20 +163,33 @@ class _ProposalCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(proposal['provider'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text(
+                  proposal['provider'] as String,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 20),
                     const SizedBox(width: 4),
-                    Text('${proposal['rating']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      '${proposal['rating']}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const Text(' (124 reviews)'),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '\$${(proposal['price'] as double).toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFEF4444)),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFEF4444),
+                  ),
                 ),
               ],
             ),
@@ -148,12 +207,14 @@ class _ProposalCard extends StatelessWidget {
                   width: 150,
                   child: ClientButton(
                     text: 'Ver Propuesta',
-                    onPressed: () => context.push('/client/proposal-detail/${proposal['id']}'),
+                    onPressed: () => context.push(
+                      '/client/proposal-detail/${proposal['id']}',
+                    ),
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

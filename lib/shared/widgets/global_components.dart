@@ -85,10 +85,10 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = outline ? const Color(0xFFEF4444) : Colors.white;
-    final backgroundColor =
-        outline ? Colors.transparent : const Color(0xFFEF4444);
-    final borderColor =
-        outline ? const Color(0xFFEF4444) : Colors.transparent;
+    final backgroundColor = outline
+        ? Colors.transparent
+        : const Color(0xFFEF4444);
+    final borderColor = outline ? const Color(0xFFEF4444) : Colors.transparent;
 
     return Material(
       color: Colors.transparent,

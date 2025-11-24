@@ -15,25 +15,25 @@ class OngoingRequestsPage extends StatelessWidget {
         return (
           bg: const Color(0xFFDCFCE7),
           text: const Color(0xFF16A34A),
-          icon: Icons.check_circle
+          icon: Icons.check_circle,
         );
       case 'sent':
         return (
           bg: const Color(0xFFDBEAFE),
           text: const Color(0xFF2563EB),
-          icon: Icons.send
+          icon: Icons.send,
         );
       case 'waiting':
         return (
           bg: const Color(0xFFFFEDD5),
           text: const Color(0xFFEA580C),
-          icon: Icons.hourglass_top
+          icon: Icons.hourglass_top,
         );
       default:
         return (
           bg: const Color(0xFFF3F4F6),
           text: const Color(0xFF4B5563),
-          icon: Icons.history
+          icon: Icons.history,
         );
     }
   }
@@ -115,7 +115,11 @@ class _OngoingRequestCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 14, color: Color(0xFF6B7280)),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: Color(0xFF6B7280),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     item.date,

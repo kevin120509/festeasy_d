@@ -16,7 +16,10 @@ class ProposalDetailPage extends StatelessWidget {
             expandedHeight: 200.0,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              title: const Text('Eventos Mágicos', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Eventos Mágicos',
+                style: TextStyle(color: Colors.white),
+              ),
               background: Image.network(
                 'https://picsum.photos/800/600', // Replaced with a more reliable URL
                 fit: BoxFit.cover,
@@ -25,7 +28,11 @@ class ProposalDetailPage extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey,
                   child: const Center(
-                    child: Icon(Icons.broken_image, color: Colors.white, size: 50),
+                    child: Icon(
+                      Icons.broken_image,
+                      color: Colors.white,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),
@@ -41,20 +48,36 @@ class ProposalDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Propuesta para tu Boda', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Propuesta para tu Boda',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16),
                   const _RatingSummary(),
                   const Divider(height: 48),
-                  const Text('¿Qué incluye?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    '¿Qué incluye?',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16),
                   _IncludedItem(text: 'Decoración estilo bohemio completo'),
                   _IncludedItem(text: 'Menú de mariscos para 50 personas'),
                   _IncludedItem(text: 'Dúo de guitarras en vivo por 3 horas'),
                   _IncludedItem(text: 'Coordinador de evento'),
                   const Divider(height: 48),
-                   const Text('Notas Adicionales', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                   const SizedBox(height: 8),
-                   const Text('No se incluyen bebidas alcohólicas. El montaje se realiza 5 horas antes del evento.', style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.5),),
+                  const Text(
+                    'Notas Adicionales',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'No se incluyen bebidas alcohólicas. El montaje se realiza 5 horas antes del evento.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -85,15 +108,22 @@ class _RatingSummary extends StatelessWidget {
           children: [
             Icon(Icons.star, color: Colors.amber, size: 24),
             SizedBox(width: 8),
-            Text('4.8', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              '4.8',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             SizedBox(width: 4),
             Text('(124 reviews)', style: TextStyle(color: Colors.grey)),
           ],
         ),
         Text(
           '\$2,500.00',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEF4444)),
-        )
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFEF4444),
+          ),
+        ),
       ],
     );
   }

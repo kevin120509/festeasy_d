@@ -5,6 +5,7 @@ enum RegisterStatus {
   submissionInProgress,
   submissionSuccess,
   submissionFailure,
+  submissionSuccessEmailConfirmationNeeded,
 }
 
 extension RegisterStatusX on RegisterStatus {
@@ -12,6 +13,8 @@ extension RegisterStatusX on RegisterStatus {
       this == RegisterStatus.submissionInProgress;
   bool get isSubmissionSuccess => this == RegisterStatus.submissionSuccess;
   bool get isSubmissionFailure => this == RegisterStatus.submissionFailure;
+  bool get isSubmissionSuccessEmailConfirmationNeeded =>
+      this == RegisterStatus.submissionSuccessEmailConfirmationNeeded;
 }
 
 class RegisterState extends Equatable {
@@ -36,8 +39,16 @@ class RegisterState extends Equatable {
   final User? user;
 
   @override
-  List<Object?> get props =>
-      [name, email, phone, password, role, businessName, status, user];
+  List<Object?> get props => [
+    name,
+    email,
+    phone,
+    password,
+    role,
+    businessName,
+    status,
+    user,
+  ];
 
   RegisterState copyWith({
     String? name,

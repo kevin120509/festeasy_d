@@ -18,18 +18,26 @@ class ClientButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18), // Increased horizontal padding
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 18,
+        ), // Increased horizontal padding
         minimumSize: const Size.fromHeight(55), // Increased minimum height
         shape: const StadiumBorder(),
-        backgroundColor: isOutline ? Colors.transparent : const Color(0xFFEF4444),
+        backgroundColor: isOutline
+            ? Colors.transparent
+            : const Color(0xFFEF4444),
         foregroundColor: isOutline ? const Color(0xFFEF4444) : Colors.white,
         elevation: isOutline ? 0 : 2,
-        side: isOutline ? const BorderSide(color: Color(0xFFEF4444), width: 2) : null,
+        side: isOutline
+            ? const BorderSide(color: Color(0xFFEF4444), width: 2)
+            : null,
       ),
       child: Text(
         text,
         maxLines: 1, // Ensure text does not wrap
-        overflow: TextOverflow.ellipsis, // Truncate with ellipsis if text is too long
+        overflow:
+            TextOverflow.ellipsis, // Truncate with ellipsis if text is too long
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
@@ -55,14 +63,19 @@ class ModernInput extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: const Color(0xFF9CA3AF)) : null,
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: const Color(0xFF9CA3AF))
+            : null,
         filled: true,
         fillColor: const Color(0xFFF3F4F6),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
       ),
     );
   }
@@ -103,7 +116,9 @@ class InputGroup extends StatelessWidget {
           obscureText: isPassword,
           keyboardType: keyboardType,
           decoration: InputDecoration(
-            prefixIcon: icon != null ? Icon(icon, color: const Color(0xFF9CA3AF)) : null,
+            prefixIcon: icon != null
+                ? Icon(icon, color: const Color(0xFF9CA3AF))
+                : null,
             filled: true,
             fillColor: const Color(0xFFF3F4F6),
             border: OutlineInputBorder(
@@ -157,7 +172,7 @@ class ServiceCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
-              )
+              ),
             ],
           ),
         ),

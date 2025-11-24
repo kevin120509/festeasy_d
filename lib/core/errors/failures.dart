@@ -16,3 +16,7 @@ class ServerFailure extends Failure {
 class CacheFailure extends Failure {
   const CacheFailure(String message) : super(message);
 }
+
+class EmailConfirmationFailure extends Failure {
+  const EmailConfirmationFailure(String message) : super(message);
+}

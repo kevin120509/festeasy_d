@@ -2,19 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class PartyType {
-  const PartyType({required this.id, required this.name, required this.imageUrl});
+  const PartyType({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+  });
   final String id;
   final String name;
   final String imageUrl;
 }
 
 final _partyTypes = [
-  const PartyType(id: '1', name: 'Boda', imageUrl: 'https://picsum.photos/id/237/400/300'),
-  const PartyType(id: '2', name: 'XV Años', imageUrl: 'https://picsum.photos/id/160/400/300'),
-  const PartyType(id: '3', name: 'Infantil', imageUrl: 'https://picsum.photos/id/214/400/300'),
-  const PartyType(id: '4', name: 'Corporativo', imageUrl: 'https://picsum.photos/id/350/400/300'),
+  const PartyType(
+    id: '1',
+    name: 'Boda',
+    imageUrl: 'https://picsum.photos/id/237/400/300',
+  ),
+  const PartyType(
+    id: '2',
+    name: 'XV Años',
+    imageUrl: 'https://picsum.photos/id/160/400/300',
+  ),
+  const PartyType(
+    id: '3',
+    name: 'Infantil',
+    imageUrl: 'https://picsum.photos/id/214/400/300',
+  ),
+  const PartyType(
+    id: '4',
+    name: 'Corporativo',
+    imageUrl: 'https://picsum.photos/id/350/400/300',
+  ),
 ];
-
 
 class PartyTypePage extends StatelessWidget {
   const PartyTypePage({super.key});
@@ -32,7 +51,11 @@ class PartyTypePage extends StatelessWidget {
         ),
         title: const Text(
           '¿Qué vas a celebrar?',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
       ),
       body: GridView.builder(
@@ -95,7 +118,7 @@ class _PartyTypeCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

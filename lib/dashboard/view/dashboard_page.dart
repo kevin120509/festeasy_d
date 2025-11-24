@@ -81,8 +81,11 @@ class _DashboardViewState extends State<DashboardView> {
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.notifications_outlined,
-                      color: Color(0xFF4B5563), size: 28),
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Color(0xFF4B5563),
+                    size: 28,
+                  ),
                   onPressed: () {},
                 ),
                 Positioned(
@@ -97,7 +100,7 @@ class _DashboardViewState extends State<DashboardView> {
                       border: Border.all(color: Colors.white, width: 1.5),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -108,7 +111,9 @@ class _DashboardViewState extends State<DashboardView> {
           if (state.status == DashboardStatus.loading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state.status == DashboardStatus.failure) {
-            return Center(child: Text(state.errorMessage ?? 'An error occurred'));
+            return Center(
+              child: Text(state.errorMessage ?? 'An error occurred'),
+            );
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -145,7 +150,9 @@ class _DashboardViewState extends State<DashboardView> {
                 CustomCard(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -165,8 +172,9 @@ class _DashboardViewState extends State<DashboardView> {
                             Text(
                               _isOnline ? 'En línea' : 'Desconectado',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF374151)),
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF374151),
+                              ),
                             ),
                           ],
                         ),
@@ -186,9 +194,10 @@ class _DashboardViewState extends State<DashboardView> {
                 const Text(
                   'Atajos rápidos',
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937)),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 PrimaryButton(
@@ -203,20 +212,17 @@ class _DashboardViewState extends State<DashboardView> {
                       _MenuItem(
                         icon: Icons.calendar_today_outlined,
                         text: 'Calendario',
-                        onTap: () =>
-                            context.go('/provider/dashboard/calendar'),
+                        onTap: () => context.go('/provider/dashboard/calendar'),
                       ),
                       _MenuItem(
                         icon: Icons.chat_bubble_outline,
                         text: 'Mensajes / Chats',
-                        onTap: () =>
-                            context.go('/provider/dashboard/messages'),
+                        onTap: () => context.go('/provider/dashboard/messages'),
                       ),
                       _MenuItem(
                         icon: Icons.person_outline,
                         text: 'Perfil / Mi negocio',
-                        onTap: () =>
-                            context.go('/provider/dashboard/profile'),
+                        onTap: () => context.go('/provider/dashboard/profile'),
                         hasBorder: false,
                       ),
                     ],
@@ -252,8 +258,9 @@ class _StatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: CustomCard(
-        border:
-            hasBorder ? Border(left: BorderSide(color: color, width: 4)) : null,
+        border: hasBorder
+            ? Border(left: BorderSide(color: color, width: 4))
+            : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -262,15 +269,19 @@ class _StatCard extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w600),
+                  fontSize: 12,
+                  color: Color(0xFF6B7280),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
                 style: TextStyle(
-                    fontSize: 32, fontWeight: FontWeight.bold, color: color),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -281,11 +292,12 @@ class _StatCard extends StatelessWidget {
 }
 
 class _MenuItem extends StatelessWidget {
-  const _MenuItem(
-      {required this.icon,
-      required this.text,
-      this.onTap,
-      this.hasBorder = true});
+  const _MenuItem({
+    required this.icon,
+    required this.text,
+    this.onTap,
+    this.hasBorder = true,
+  });
 
   final IconData icon;
   final String text;
@@ -300,7 +312,9 @@ class _MenuItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: hasBorder
-              ? const Border(bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1))
+              ? const Border(
+                  bottom: BorderSide(color: Color(0xFFF3F4F6), width: 1),
+                )
               : null,
         ),
         child: Row(
@@ -308,11 +322,15 @@ class _MenuItem extends StatelessWidget {
             Icon(icon, color: const Color(0xFF6B7280), size: 20),
             const SizedBox(width: 12),
             Expanded(
-                child: Text(text,
-                    style: const TextStyle(
-                        color: Color(0xFF374151),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15))),
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: Color(0xFF374151),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              ),
+            ),
             const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF), size: 20),
           ],
         ),

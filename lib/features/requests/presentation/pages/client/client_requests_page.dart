@@ -53,7 +53,10 @@ class _ClientRequestsPageState extends State<ClientRequestsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Mis Solicitudes', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: const Text(
+          'Mis Solicitudes',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -85,7 +88,9 @@ class _ClientRequestsPageState extends State<ClientRequestsPage> {
                     backgroundColor: const Color(0xFFF3F4F6),
                     selectedColor: const Color(0xFFEF4444),
                     labelStyle: TextStyle(
-                      color: _selectedFilter == filter ? Colors.white : Colors.black,
+                      color: _selectedFilter == filter
+                          ? Colors.white
+                          : Colors.black,
                       fontWeight: FontWeight.w600,
                     ),
                     side: BorderSide.none,
@@ -177,7 +182,8 @@ class _RequestCard extends StatelessWidget {
                 width: 120,
                 child: ClientButton(
                   text: 'Revisar',
-                  onPressed: () => context.push('/client/request-detail/${request['id']}'),
+                  onPressed: () =>
+                      context.push('/client/request-detail/${request['id']}'),
                 ),
               ),
             ],

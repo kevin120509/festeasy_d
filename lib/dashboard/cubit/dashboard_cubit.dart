@@ -8,21 +8,25 @@ class DashboardCubit extends Cubit<DashboardState> {
   final GetProviderDashboardDataUseCase _getProviderDashboardDataUseCase;
 
   DashboardCubit(this._getProviderDashboardDataUseCase)
-      : super(const DashboardState());
+    : super(const DashboardState());
 
   Future<void> getDashboardData(String providerId) async {
     emit(state.copyWith(status: DashboardStatus.loading));
     final result = await _getProviderDashboardDataUseCase(providerId);
     result.fold(
-      (failure) => emit(state.copyWith(
-        status: DashboardStatus.failure,
-        errorMessage: failure.message,
-      )),
-      (data) => emit(state.copyWith(
-        status: DashboardStatus.success,
-        newRequestsCount: data['newRequestsCount'],
-        ongoingRequestsCount: data['ongoingRequestsCount'],
-      )),
+      (failure) => emit(
+        state.copyWith(
+          status: DashboardStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (data) => emit(
+        state.copyWith(
+          status: DashboardStatus.success,
+          newRequestsCount: data['newRequestsCount'],
+          ongoingRequestsCount: data['ongoingRequestsCount'],
+        ),
+      ),
     );
   }
 }

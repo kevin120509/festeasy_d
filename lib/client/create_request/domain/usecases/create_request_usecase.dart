@@ -38,13 +38,13 @@ class CreateRequestParams extends Equatable {
 
   @override
   List<Object?> get props => [
-        title,
-        description,
-        categoryId,
-        eventDate,
-        eventTime,
-        location,
-        guestCount,
-        clientId,
-      ];
+    title,
+    description,
+    categoryId,
+    eventDate,
+    eventTime,
+    location,
+    guestCount,
+    clientId,
+  ];
 }

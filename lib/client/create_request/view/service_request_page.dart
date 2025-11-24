@@ -64,25 +64,26 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
       context.read<ServiceRequestCubit>().titleChanged(_titleController.text);
     });
     _descriptionController.addListener(() {
-      context
-          .read<ServiceRequestCubit>()
-          .descriptionChanged(_descriptionController.text);
+      context.read<ServiceRequestCubit>().descriptionChanged(
+        _descriptionController.text,
+      );
     });
     _locationController.addListener(() {
-      context
-          .read<ServiceRequestCubit>()
-          .locationChanged(_locationController.text);
+      context.read<ServiceRequestCubit>().locationChanged(
+        _locationController.text,
+      );
     });
     _guestCountController.addListener(() {
-      context
-          .read<ServiceRequestCubit>()
-          .guestCountChanged(int.tryParse(_guestCountController.text) ?? 0);
+      context.read<ServiceRequestCubit>().guestCountChanged(
+        int.tryParse(_guestCountController.text) ?? 0,
+      );
     });
   }
 
   Future<void> _fetchCategories() async {
-    final categories =
-        await context.read<ServiceRequestCubit>().getServiceCategories();
+    final categories = await context
+        .read<ServiceRequestCubit>()
+        .getServiceCategories();
     setState(() {
       _categories = categories;
     });
@@ -139,8 +140,10 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Describe tu evento',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: const Text(
+          'Describe tu evento',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
       ),
       body: BlocListener<ServiceRequestCubit, ServiceRequestState>(
         listener: (context, state) {
@@ -167,7 +170,9 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
               const Text(
                 'Title',
                 style: TextStyle(
-                    fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -186,7 +191,9 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
               const Text(
                 'Descripción',
                 style: TextStyle(
-                    fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -207,10 +214,12 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 items: _categories
-                    .map((category) => DropdownMenuItem(
-                          value: category.id,
-                          child: Text(category.name),
-                        ))
+                    .map(
+                      (category) => DropdownMenuItem(
+                        value: category.id,
+                        child: Text(category.name),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -285,7 +294,9 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
                                 Supabase.instance.client.auth.currentUser;
                             if (user != null && _selectedTime != null) {
                               context.read<ServiceRequestCubit>().submitRequest(
-                                  user.id, _selectedTime!.format(context));
+                                user.id,
+                                _selectedTime!.format(context),
+                              );
                             }
                           },
                         );

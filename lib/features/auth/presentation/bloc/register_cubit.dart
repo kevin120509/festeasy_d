@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:festeasy/core/errors/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/register_usecase.dart';
 
@@ -50,8 +51,17 @@ class RegisterCubit extends Cubit<RegisterState> {
     );
 
     result.fold(
-      (failure) =>
-          emit(state.copyWith(status: RegisterStatus.submissionFailure)),
+      (failure) {
+        if (failure is EmailConfirmationFailure) {
+          emit(
+            state.copyWith(
+              status: RegisterStatus.submissionSuccessEmailConfirmationNeeded,
+            ),
+          );
+        } else {
+          emit(state.copyWith(status: RegisterStatus.submissionFailure));
+        }
+      },
       (user) => emit(
         state.copyWith(
           status: RegisterStatus.submissionSuccess,

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:festeasy/core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/service_category.dart';
 import '../../domain/entities/user.dart';
@@ -39,6 +40,8 @@ class AuthRepositoryImpl implements AuthRepository {
           businessName: businessName,
         ),
       );
+    } on EmailConfirmationRequiredException catch (e) {
+      return Left(EmailConfirmationFailure(e.message));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -64,10 +67,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Map<String, int>>> getProviderDashboardData(
-      String providerId) async {
+    String providerId,
+  ) async {
     try {
       return Right(
-          await _remoteDataSource.getProviderDashboardData(providerId));
+        await _remoteDataSource.getProviderDashboardData(providerId),
+      );
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

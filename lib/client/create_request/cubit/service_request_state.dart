@@ -10,8 +10,10 @@ enum ServiceRequestStatus {
 extension ServiceRequestStatusX on ServiceRequestStatus {
   bool get isSubmissionInProgress =>
       this == ServiceRequestStatus.submissionInProgress;
-  bool get isSubmissionSuccess => this == ServiceRequestStatus.submissionSuccess;
-  bool get isSubmissionFailure => this == ServiceRequestStatus.submissionFailure;
+  bool get isSubmissionSuccess =>
+      this == ServiceRequestStatus.submissionSuccess;
+  bool get isSubmissionFailure =>
+      this == ServiceRequestStatus.submissionFailure;
 }
 
 class ServiceRequestState extends Equatable {
@@ -37,15 +39,15 @@ class ServiceRequestState extends Equatable {
 
   @override
   List<Object?> get props => [
-        title,
-        description,
-        eventDate,
-        eventTime,
-        location,
-        guestCount,
-        status,
-        categoryId,
-      ];
+    title,
+    description,
+    eventDate,
+    eventTime,
+    location,
+    guestCount,
+    status,
+    categoryId,
+  ];
 
   ServiceRequestState copyWith({
     String? title,

@@ -27,7 +27,10 @@ class ConfirmedEventPage extends StatelessWidget {
             Chip(
               label: Text(event.status.toUpperCase()),
               backgroundColor: const Color(0xFFDCFCE7),
-              labelStyle: const TextStyle(color: Color(0xFF16A34A), fontWeight: FontWeight.bold),
+              labelStyle: const TextStyle(
+                color: Color(0xFF16A34A),
+                fontWeight: FontWeight.bold,
+              ),
               side: BorderSide.none,
             ),
             const SizedBox(height: 24),
@@ -44,7 +47,9 @@ class ConfirmedEventPage extends StatelessWidget {
                 title: 'Llamar al Cliente',
                 icon: Icons.phone,
                 outline: true,
-                onPress: () { /* TODO: Implement launchUrl('tel:${event.clientPhone}') */ },
+                onPress: () {
+                  /* TODO: Implement launchUrl('tel:${event.clientPhone}') */
+                },
               ),
             ),
             const SizedBox(width: 16),
@@ -52,7 +57,9 @@ class ConfirmedEventPage extends StatelessWidget {
               child: PrimaryButton(
                 title: 'Abrir Chat',
                 icon: Icons.chat_bubble,
-                onPress: () { /* TODO: Implement context.push('/messages/...') */ },
+                onPress: () {
+                  /* TODO: Implement context.push('/messages/...') */
+                },
               ),
             ),
           ],
@@ -73,10 +80,27 @@ class _InfoCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _InfoRow(icon: Icons.person, title: 'Cliente', subtitle: event.clientName),
-            _InfoRow(icon: Icons.construction, title: 'Servicios', subtitle: event.service),
-            _InfoRow(icon: Icons.calendar_today, title: 'Fecha y Hora', subtitle: '${event.date}, ${event.time}'),
-            _InfoRow(icon: Icons.pin_drop, title: 'Ubicación', subtitle: event.location, hasBorder: false),
+            _InfoRow(
+              icon: Icons.person,
+              title: 'Cliente',
+              subtitle: event.clientName,
+            ),
+            _InfoRow(
+              icon: Icons.construction,
+              title: 'Servicios',
+              subtitle: event.service,
+            ),
+            _InfoRow(
+              icon: Icons.calendar_today,
+              title: 'Fecha y Hora',
+              subtitle: '${event.date}, ${event.time}',
+            ),
+            _InfoRow(
+              icon: Icons.pin_drop,
+              title: 'Ubicación',
+              subtitle: event.location,
+              hasBorder: false,
+            ),
           ],
         ),
       ),
@@ -102,7 +126,9 @@ class _InfoRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        border: hasBorder ? const Border(bottom: BorderSide(color: Color(0xFFF3F4F6))) : null,
+        border: hasBorder
+            ? const Border(bottom: BorderSide(color: Color(0xFFF3F4F6)))
+            : null,
       ),
       child: Row(
         children: [
@@ -113,9 +139,15 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(title, style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 2),
-              Text(subtitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );

@@ -45,7 +45,11 @@ class ProfilePage extends StatelessWidget {
                       // TODO(future): Navigate to My Business Page
                     },
                   ),
-                  const Divider(height: 1, indent: 56, color: Color(0xFFF3F4F6)),
+                  const Divider(
+                    height: 1,
+                    indent: 56,
+                    color: Color(0xFFF3F4F6),
+                  ),
                   _MenuItem(
                     icon: Icons.article_outlined,
                     text: 'Mis Servicios',
@@ -67,7 +71,11 @@ class ProfilePage extends StatelessWidget {
                     color: const Color(0xFF6B7280),
                     onTap: () => context.push('/settings'),
                   ),
-                  const Divider(height: 1, indent: 56, color: Color(0xFFF3F4F6)),
+                  const Divider(
+                    height: 1,
+                    indent: 56,
+                    color: Color(0xFFF3F4F6),
+                  ),
                   _MenuItem(
                     icon: Icons.logout,
                     text: 'Cerrar Sesión',
@@ -102,7 +110,7 @@ class _ProfileHeader extends StatelessWidget {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 10,
-                )
+                ),
               ],
             ),
             child: const CircleAvatar(

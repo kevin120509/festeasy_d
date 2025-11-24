@@ -22,11 +22,11 @@ class DashboardState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        newRequestsCount,
-        ongoingRequestsCount,
-        errorMessage,
-      ];
+    status,
+    newRequestsCount,
+    ongoingRequestsCount,
+    errorMessage,
+  ];
 
   DashboardState copyWith({
     DashboardStatus? status,

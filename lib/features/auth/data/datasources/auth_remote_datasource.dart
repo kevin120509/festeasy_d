@@ -1,4 +1,6 @@
-import 'package:festeasy/features/auth/domain/entities/service_category.dart' as domain;
+import 'package:festeasy/core/errors/exceptions.dart';
+import 'package:festeasy/features/auth/domain/entities/service_category.dart'
+    as domain;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/user.dart' as domain;
 
@@ -93,26 +95,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (response.user == null) {
-        throw Exception('Registration failed: No user returned');
+        throw EmailConfirmationRequiredException();
       }
 
-      // Profile is auto-created by trigger, fetch it
-      final profileData = await supabaseClient
-          .from('profiles')
-          .select()
-          .eq('id', response.user!.id)
-          .single();
-
+      // Return user directly from input data to avoid race condition with profile trigger
       return domain.User(
         id: response.user!.id,
         email: response.user!.email!,
-        name: profileData['full_name'] as String,
-        role: profileData['role'] as String,
-        phone: profileData['phone'] as String?,
-        avatarUrl: profileData['avatar_url'] as String?,
-        businessName: profileData['business_name'] as String?,
+        name: name,
+        role: role,
+        phone: phone,
+        businessName: businessName,
       );
     } catch (e) {
+      if (e is EmailConfirmationRequiredException) {
+        rethrow;
+      }
       throw Exception('Registration error: $e');
     }
   }
@@ -155,12 +153,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await supabaseClient.from('service_categories').select();
       return (response as List)
-          .map((e) => domain.ServiceCategory(
-                id: e['id'] as String,
-                name: e['name'] as String,
-                description: e['description'] as String?,
-                icon: e['icon'] as String?,
-              ))
+          .map(
+            (e) => domain.ServiceCategory(
+              id: e['id'] as String,
+              name: e['name'] as String,
+              description: e['description'] as String?,
+              icon: e['icon'] as String?,
+            ),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to get service categories: $e');

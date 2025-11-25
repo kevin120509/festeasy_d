@@ -79,11 +79,16 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
       body: BlocListener<RegisterCubit, RegisterState>(
         listener: (context, state) {
           if (state.status.isSubmissionSuccess) {
-            if (state.role == 'provider') {
-              context.go('/provider/dashboard');
-            } else {
-              context.go('/client/party-type');
-            }
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Registration successful!',
+                  ),
+                ),
+              );
+            context.go('/'); // Redirect to welcome screen
           } else if (state.status.isSubmissionSuccessEmailConfirmationNeeded) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
@@ -94,7 +99,7 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                   ),
                 ),
               );
-            context.go('/login');
+            context.go('/'); // Redirect to welcome screen
           } else if (state.status.isSubmissionFailureUserAlreadyRegistered) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()

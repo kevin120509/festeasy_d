@@ -53,11 +53,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       // Fetch profile data including role
-      final profileData = await supabaseClient
+      final profileResponse = await supabaseClient
           .from('profiles')
           .select()
-          .eq('id', response.user!.id)
-          .single();
+          .eq('id', response.user!.id);
+
+      if (profileResponse.isEmpty) {
+        // Profile doesn't exist, trigger failed. Return default user.
+        return domain.User(
+          id: response.user!.id,
+          email: response.user!.email!,
+          name: 'Usuario',
+          role: 'client',
+        );
+      }
+
+      final profileData = profileResponse.first;
 
       return domain.User(
         id: response.user!.id,

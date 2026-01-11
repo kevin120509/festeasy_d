@@ -1,6 +1,12 @@
-import 'package:festeasy/shared/widgets/client_components.dart';
+import 'package:festeasy/features/requests/data/datasources/requests_remote_datasource.dart';
+import 'package:festeasy/features/requests/data/repositories/requests_repository_impl.dart';
+import 'package:festeasy/features/requests/domain/usecases/get_request_by_id_usecase.dart';
+import 'package:festeasy/features/requests/presentation/bloc/request_detail_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class ClientRequestDetailPage extends StatelessWidget {
   const ClientRequestDetailPage({super.key, required this.requestId});
@@ -8,45 +14,39 @@ class ClientRequestDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mock data for demonstration
-    final requestDetails = {
-      'category': 'Fotografía de Eventos',
-      'description':
-          'Necesito un fotógrafo profesional para un evento corporativo de 4 horas. Cubrir la ceremonia de premiación y el cóctel posterior. Se requieren 200 fotos editadas en alta resolución.',
-      'location': 'Hotel Gran Plaza, Ciudad de México',
-      'date': '18 de Noviembre, 2025',
-      'guests': '100',
-    };
-    final proposals = [
-      {
-        'id': '1',
-        'provider': 'FotoPro Eventos',
-        'rating': 4.9,
-        'price': 1800.0,
-      },
-      {
-        'id': '2',
-        'provider': 'Captura Momentos SA',
-        'rating': 4.7,
-        'price': 1500.0,
-      },
-      {
-        'id': '3',
-        'provider': 'Lente Mágico Estudio',
-        'rating': 5.0,
-        'price': 2000.0,
-      },
-    ];
+    return BlocProvider(
+      create: (context) => RequestDetailCubit(
+        GetRequestByIdUseCase(
+          RequestsRepositoryImpl(
+            RequestsRemoteDataSourceImpl(
+              supabaseClient: Supabase.instance.client,
+            ),
+          ),
+        ),
+      )..loadRequest(requestId),
+      child: const ClientRequestDetailView(),
+    );
+  }
+}
 
+class ClientRequestDetailView extends StatelessWidget {
+  const ClientRequestDetailView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text(
-          requestDetails['category']!,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+        title: BlocBuilder<RequestDetailCubit, RequestDetailState>(
+          builder: (context, state) {
+            return Text(
+              state.request?.title ?? 'Detalle de Solicitud',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            );
+          },
         ),
         backgroundColor: Colors.white,
         elevation: 1,
@@ -55,66 +55,196 @@ class ClientRequestDetailPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Request Details Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
+      body: BlocBuilder<RequestDetailCubit, RequestDetailState>(
+        builder: (context, state) {
+          if (state.status == RequestDetailStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state.status == RequestDetailStatus.failure) {
+            return const Center(child: Text('Error al cargar la solicitud'));
+          } else if (state.status == RequestDetailStatus.success &&
+              state.request != null) {
+            final request = state.request!;
+            final dateFormat = DateFormat('dd \'de\' MMMM \'de\' yyyy', 'es');
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'DETALLES DE TU SOLICITUD',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
+                  // Event Information Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'INFORMACIÓN DEL EVENTO',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          request.title,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Divider(height: 32),
+                        if (request.eventDate != null)
+                          _InfoRow(
+                            icon: Icons.calendar_today,
+                            text: dateFormat.format(request.eventDate!),
+                            subtext:
+                                request.eventTime ?? 'Hora no especificada',
+                          ),
+                        if (request.location != null &&
+                            request.location!.isNotEmpty)
+                          _InfoRow(
+                            icon: Icons.place,
+                            text: request.location!,
+                            subtext:
+                                request.address ?? 'Dirección no especificada',
+                          ),
+                        if (request.guestCount != null)
+                          _InfoRow(
+                            icon: Icons.people,
+                            text: '${request.guestCount} invitados',
+                          ),
+                        if (request.totalBudget != null &&
+                            request.totalBudget! > 0)
+                          _InfoRow(
+                            icon: Icons.attach_money,
+                            text:
+                                '\$${request.totalBudget!.toStringAsFixed(2)}',
+                            subtext: 'Presupuesto Total del Evento',
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    requestDetails['description']!,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                  const SizedBox(height: 20),
+                  // Request Details Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'DETALLES DE LA SOLICITUD',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _StatusBadge(status: request.status),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Descripción:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          request.description,
+                          style: const TextStyle(fontSize: 16, height: 1.5),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Divider(height: 32),
-                  _InfoRow(
-                    icon: Icons.pin_drop,
-                    text: requestDetails['location']!,
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Propuestas Recibidas',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  _InfoRow(
-                    icon: Icons.calendar_today,
-                    text: requestDetails['date']!,
-                  ),
-                  _InfoRow(
-                    icon: Icons.people,
-                    text: '${requestDetails['guests']} invitados',
+                  const SizedBox(height: 16),
+                  // Placeholder for proposals
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'No hay propuestas todavía.',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'Propuestas Recibidas',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            // Proposals List
-            ListView.separated(
-              itemCount: proposals.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                return _ProposalCard(proposal: proposals[index]);
-              },
-            ),
-          ],
+            );
+          }
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status});
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    String text;
+
+    switch (status) {
+      case 'abierta':
+        color = Colors.orange;
+        text = 'Pendiente';
+        break;
+      case 'enviada':
+        color = Colors.blue;
+        text = 'Enviada';
+        break;
+      case 'cotizada':
+        color = Colors.orange;
+        text = 'Cotizada';
+        break;
+      case 'contratada':
+        color = Colors.purple;
+        text = 'Contratada';
+        break;
+      case 'cancelada':
+        color = Colors.red;
+        text = 'Cancelada';
+        break;
+      default:
+        color = Colors.grey;
+        text = status;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );
@@ -122,96 +252,36 @@ class ClientRequestDetailPage extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.text});
+  const _InfoRow({required this.icon, required this.text, this.subtext});
   final IconData icon;
   final String text;
+  final String? subtext;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFFEF4444)),
+          Icon(icon, color: const Color(0xFFEF4444), size: 20),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProposalCard extends StatelessWidget {
-  const _ProposalCard({required this.proposal});
-  final Map<String, dynamic> proposal;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  proposal['provider'] as String,
+                  text,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 20),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${proposal['rating']}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const Text(' (124 reviews)'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '\$${(proposal['price'] as double).toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFEF4444),
+                if (subtext != null && subtext!.isNotEmpty)
+                  Text(
+                    subtext!,
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 150,
-                  child: ClientButton(
-                    text: 'Ver Propuesta',
-                    onPressed: () => context.push(
-                      '/client/proposal-detail/${proposal['id']}',
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

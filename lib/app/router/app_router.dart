@@ -10,6 +10,7 @@ import 'package:festeasy/client/payment/view/reservation_confirmed_page.dart';
 import 'package:festeasy/features/profile/presentation/pages/client/client_profile_page.dart';
 import 'package:festeasy/features/requests/presentation/pages/client/client_requests_page.dart';
 import 'package:festeasy/features/requests/presentation/pages/client/request_detail_page.dart';
+import 'package:festeasy/client/create_solicitud/view/create_solicitud_page.dart';
 import 'package:festeasy/dashboard/view/dashboard_page.dart';
 import 'package:festeasy/features/auth/presentation/pages/login_page.dart';
 // Provider specific pages
@@ -214,6 +215,19 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/client/create-solicitud/:eventId',
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: CreateSolicitudPage(
+            eventId: state.pathParameters['eventId']!,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+      GoRoute(
         path: '/client/request-detail/:id',
         pageBuilder: (context, state) => CustomTransitionPage<void>(
           key: state.pageKey,
@@ -278,9 +292,9 @@ class AppRouter {
           state.matchedLocation == '/' || state.matchedLocation == '/login';
       final bool isAtRegister = state.matchedLocation == '/client/register';
 
-      // If user is authenticated and tries to access login, welcome, or register, redirect to client home
+      // If user is authenticated and tries to access login, welcome, or register, redirect to party type selection
       if (isAuthenticated && (isAtLoginOrWelcome || isAtRegister)) {
-        return '/client/home';
+        return '/client/party-type';
       }
       // Allow access to login, welcome, and register without authentication
       // if (!isAuthenticated && !isAtLoginOrWelcome && !isAtRegister) {

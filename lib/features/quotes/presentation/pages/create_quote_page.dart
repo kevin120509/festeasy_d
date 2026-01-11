@@ -8,12 +8,14 @@ class CreateQuotePage extends StatefulWidget {
   final String requestId;
   final String requestTitle;
   final String providerId;
+  final String serviceId;
 
   const CreateQuotePage({
     super.key,
     required this.requestId,
     required this.requestTitle,
     required this.providerId,
+    required this.serviceId,
   });
 
   @override

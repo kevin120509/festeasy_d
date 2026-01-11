@@ -49,7 +49,7 @@ class LoginForm extends StatelessWidget {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(content: Text('Error: Revisa tus credenciales')),
+              SnackBar(content: Text('Error: ${state.errorMessage ?? "Revisa tus credenciales"}')),
             );
         }
       },

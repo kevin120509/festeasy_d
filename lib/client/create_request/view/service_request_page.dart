@@ -8,6 +8,7 @@ import 'package:festeasy/shared/widgets/client_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ServiceRequestPage extends StatelessWidget {
@@ -45,20 +46,51 @@ class ServiceRequestView extends StatefulWidget {
 }
 
 class _ServiceRequestViewState extends State<ServiceRequestView> {
+  String? _savedEventTypeId;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _locationController = TextEditingController();
+  final _addressController = TextEditingController();
   final _guestCountController = TextEditingController();
 
   List<ServiceCategory> _categories = [];
   String? _selectedCategory;
+  List<ServiceCategory> _eventTypes = [];
+  String? _selectedEventType;
   TimeOfDay? _selectedTime;
+
+  Future<void> _loadSavedEventType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEventTypeId = prefs.getString('selected_party_type_id');
+    if (savedEventTypeId != null) {
+      // Verificar que el tipo de evento existe en la lista
+      final existsInList = _eventTypes.any(
+        (type) => type.id == savedEventTypeId,
+      );
+      if (existsInList) {
+        setState(() {
+          _selectedEventType = savedEventTypeId;
+        });
+        // Notificar al cubit sobre la selección guardada
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<ServiceRequestCubit>().eventTypeIdChanged(
+            savedEventTypeId,
+          );
+        });
+      } else {
+        print(
+          'Warning: Saved event type ID $savedEventTypeId not found in available types',
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _loadSavedEventType();
     _fetchCategories();
     _titleController.addListener(() {
       context.read<ServiceRequestCubit>().titleChanged(_titleController.text);
@@ -73,6 +105,11 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
         _locationController.text,
       );
     });
+    _addressController.addListener(() {
+      context.read<ServiceRequestCubit>().addressChanged(
+        _addressController.text,
+      );
+    });
     _guestCountController.addListener(() {
       context.read<ServiceRequestCubit>().guestCountChanged(
         int.tryParse(_guestCountController.text) ?? 0,
@@ -84,8 +121,67 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
     final categories = await context
         .read<ServiceRequestCubit>()
         .getServiceCategories();
+
+    // Si no hay categorías de la base de datos, usar categorías de respaldo con UUIDs
+    final fallbackCategories = [
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440001',
+        name: 'Catering',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440002',
+        name: 'Música',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440003',
+        name: 'Fotografía',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440004',
+        name: 'Decoración',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440005',
+        name: 'Lugar',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440006',
+        name: 'Transporte',
+      ),
+    ];
+
+    // Categorías de eventos hardcodeadas por ahora
+    final eventTypeFallbacks = [
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440011',
+        name: 'Boda',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440012',
+        name: 'XV Años',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440013',
+        name: 'Cumpleaños',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440014',
+        name: 'Bautizo',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440015',
+        name: 'Graduación',
+      ),
+      const ServiceCategory(
+        id: '550e8400-e29b-41d4-a716-446655440016',
+        name: 'Corporativo',
+      ),
+    ];
+
     setState(() {
-      _categories = categories;
+      _categories = categories.isNotEmpty ? categories : fallbackCategories;
+      _eventTypes =
+          eventTypeFallbacks; // Usar categorías hardcodeadas por ahora
     });
   }
 
@@ -125,6 +221,7 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
     _dateController.dispose();
     _timeController.dispose();
     _locationController.dispose();
+    _addressController.dispose();
     _guestCountController.dispose();
     super.dispose();
   }
@@ -138,7 +235,7 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/client/home'),
         ),
         title: const Text(
           'Describe tu evento',
@@ -147,18 +244,25 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
       ),
       body: BlocListener<ServiceRequestCubit, ServiceRequestState>(
         listener: (context, state) {
-          if (state.status.isSubmissionSuccess) {
+          if (state.status.isSubmissionSuccess &&
+              state.createdEventId != null) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
-                const SnackBar(content: Text('Request Created Successfully')),
+                const SnackBar(content: Text('Evento creado exitosamente')),
               );
-            context.go('/client/requests');
+            // Navegar a la pantalla de solicitud con el eventId
+            context.go('/client/create-solicitud/${state.createdEventId}');
           } else if (state.status.isSubmissionFailure) {
+            String errorMessage = state.errorMessage ?? 'Error al crear evento';
+
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
-                const SnackBar(content: Text('Request Creation Failed')),
+                SnackBar(
+                  content: Text(errorMessage),
+                  duration: const Duration(seconds: 5),
+                ),
               );
           }
         },
@@ -228,7 +332,36 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
                   context.read<ServiceRequestCubit>().categoryIdChanged(value!);
                 },
                 decoration: InputDecoration(
-                  labelText: 'Category',
+                  labelText: 'Categoría de Servicio',
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              DropdownButtonFormField<String>(
+                value: _selectedEventType,
+                items: _eventTypes
+                    .map(
+                      (eventType) => DropdownMenuItem(
+                        value: eventType.id,
+                        child: Text(eventType.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedEventType = value;
+                  });
+                  context.read<ServiceRequestCubit>().eventTypeIdChanged(
+                    value!,
+                  );
+                },
+                decoration: InputDecoration(
+                  labelText: 'Tipo de Evento',
                   filled: true,
                   fillColor: const Color(0xFFF3F4F6),
                   border: OutlineInputBorder(
@@ -277,6 +410,12 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
               ),
               const SizedBox(height: 24),
               InputGroup(
+                label: 'Dirección',
+                icon: Icons.map,
+                controller: _addressController,
+              ),
+              const SizedBox(height: 24),
+              InputGroup(
                 label: 'Invitados',
                 icon: Icons.people,
                 keyboardType: TextInputType.number,
@@ -292,10 +431,11 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
                           onPressed: () {
                             final user =
                                 Supabase.instance.client.auth.currentUser;
-                            if (user != null && _selectedTime != null) {
+                            if (user != null &&
+                                _selectedTime != null &&
+                                _selectedEventType != null) {
                               context.read<ServiceRequestCubit>().submitRequest(
                                 user.id,
-                                _selectedTime!.format(context),
                               );
                             }
                           },

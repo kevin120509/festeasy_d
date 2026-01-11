@@ -12,9 +12,11 @@ abstract class AuthRepository {
     required String role,
     required String phone,
     String? businessName,
+    String? description,
+    String? categoryId,
   });
   Future<Either<Failure, List<ServiceCategory>>> getServiceCategories();
-  Future<Either<Failure, void>> createRequest(dynamic params);
+  Future<Either<Failure, String>> createRequest(dynamic params);
   Future<Either<Failure, Map<String, int>>> getProviderDashboardData(
     String providerId,
   );

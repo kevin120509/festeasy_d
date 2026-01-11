@@ -28,8 +28,11 @@ class RegisterState extends Equatable {
     this.password = '',
     this.role = 'client',
     this.businessName = '',
+    this.description = '',
+    this.categoryId = '',
     this.status = RegisterStatus.pure,
     this.user,
+    this.errorMessage,
   });
 
   final String name;
@@ -38,8 +41,11 @@ class RegisterState extends Equatable {
   final String password;
   final String role;
   final String businessName;
+  final String description;
+  final String categoryId;
   final RegisterStatus status;
   final User? user;
+  final String? errorMessage;
 
   @override
   List<Object?> get props => [
@@ -49,8 +55,11 @@ class RegisterState extends Equatable {
     password,
     role,
     businessName,
+    description,
+    categoryId,
     status,
     user,
+    errorMessage,
   ];
 
   RegisterState copyWith({
@@ -60,8 +69,11 @@ class RegisterState extends Equatable {
     String? password,
     String? role,
     String? businessName,
+    String? description,
+    String? categoryId,
     RegisterStatus? status,
     User? user,
+    String? errorMessage,
   }) {
     return RegisterState(
       name: name ?? this.name,
@@ -70,8 +82,11 @@ class RegisterState extends Equatable {
       password: password ?? this.password,
       role: role ?? this.role,
       businessName: businessName ?? this.businessName,
+      description: description ?? this.description,
+      categoryId: categoryId ?? this.categoryId,
       status: status ?? this.status,
       user: user ?? this.user,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

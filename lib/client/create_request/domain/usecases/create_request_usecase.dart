@@ -8,10 +8,9 @@ class CreateRequestUseCase {
 
   CreateRequestUseCase(this.repository);
 
-  Future<Either<Failure, void>> call(CreateRequestParams params) async {
-    // This is not ideal, the request creation should be in its own repository
-    // but for the sake of simplicity we use the AuthRepository
-    return await (repository as dynamic).createRequest(params);
+  Future<Either<Failure, String>> call(CreateRequestParams params) async {
+    // Creates an event and returns its ID
+    return await repository.createRequest(params);
   }
 }
 
@@ -19,9 +18,11 @@ class CreateRequestParams extends Equatable {
   final String title;
   final String description;
   final String categoryId;
+  final String eventTypeId; // Requerido para la tabla eventos
   final DateTime eventDate;
   final String eventTime;
   final String location;
+  final String? address; // Opcional pero recomendado
   final int guestCount;
   final String clientId;
 
@@ -29,9 +30,11 @@ class CreateRequestParams extends Equatable {
     required this.title,
     required this.description,
     required this.categoryId,
+    required this.eventTypeId,
     required this.eventDate,
     required this.eventTime,
     required this.location,
+    this.address,
     required this.guestCount,
     required this.clientId,
   });
@@ -41,9 +44,11 @@ class CreateRequestParams extends Equatable {
     title,
     description,
     categoryId,
+    eventTypeId,
     eventDate,
     eventTime,
     location,
+    address,
     guestCount,
     clientId,
   ];

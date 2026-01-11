@@ -3,6 +3,7 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/request.dart';
 import '../../domain/repositories/requests_repository.dart';
 import '../datasources/requests_remote_datasource.dart';
+import '../models/request_model.dart';
 
 class RequestsRepositoryImpl implements RequestsRepository {
   final RequestsRemoteDataSource _remoteDataSource;
@@ -10,9 +11,9 @@ class RequestsRepositoryImpl implements RequestsRepository {
   RequestsRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<Either<Failure, List<Request>>> getRequests() async {
+  Future<Either<Failure, List<Request>>> getRequests({String? userId}) async {
     try {
-      final requests = await _remoteDataSource.getRequests();
+      final requests = await _remoteDataSource.getRequests(userId: userId);
       return Right(List<Request>.from(requests));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -32,11 +33,25 @@ class RequestsRepositoryImpl implements RequestsRepository {
   @override
   Future<Either<Failure, Request>> createRequest(Request request) async {
     try {
-      // Cast Request to dynamic to avoid type issues
-      final createdRequestModel = await _remoteDataSource.createRequest(
-        request as dynamic,
+      final requestModel = RequestModel(
+        id: request.id,
+        clientId: request.clientId,
+        eventId: request.eventId,
+        categoryId: request.categoryId,
+        title: request.title,
+        description: request.description,
+        specifications: request.specifications,
+        budgetEstimate: request.budgetEstimate,
+        status: request.status,
+        expiresAt: request.expiresAt,
+        createdAt: request.createdAt,
+        updatedAt: request.updatedAt,
       );
-      return Right(createdRequestModel as Request);
+
+      final createdRequestModel = await _remoteDataSource.createRequest(
+        requestModel,
+      );
+      return Right(createdRequestModel);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

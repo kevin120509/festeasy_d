@@ -3,6 +3,7 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/quote.dart';
 import '../../domain/repositories/quote_repository.dart';
 import '../datasources/quote_remote_datasource.dart';
+import '../models/quote_model.dart';
 
 class QuoteRepositoryImpl implements QuoteRepository {
   final QuoteRemoteDataSource _remoteDataSource;
@@ -46,7 +47,17 @@ class QuoteRepositoryImpl implements QuoteRepository {
   @override
   Future<Either<Failure, Quote>> createQuote(Quote quote) async {
     try {
-      final quoteModel = quote as dynamic;
+      final quoteModel = QuoteModel(
+        id: quote.id,
+        requestId: quote.requestId,
+        providerId: quote.providerId,
+        serviceId: quote.serviceId,
+        proposedPrice: quote.proposedPrice,
+        breakdown: quote.breakdown,
+        notes: quote.notes,
+        validUntil: quote.validUntil,
+        status: quote.status,
+      );
       final createdQuote = await _remoteDataSource.createQuote(quoteModel);
       return Right(createdQuote);
     } catch (e) {

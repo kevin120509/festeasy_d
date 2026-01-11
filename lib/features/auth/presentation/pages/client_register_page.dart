@@ -120,7 +120,7 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
-                const SnackBar(content: Text('Registration Failed')),
+                SnackBar(content: Text(state.errorMessage ?? 'Registration Failed')),
               );
           }
         },

@@ -74,7 +74,7 @@ class _RequestListItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CustomBadge(
-                    text: request.category,
+                    text: request.categoryId,
                     color: const Color(0xFFEF4444),
                     bg: const Color(0xFFFEF2F2),
                   ),
@@ -109,7 +109,8 @@ class _RequestListItem extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    request.date,
+                    request.eventDate?.toIso8601String().split('T').first ??
+                        'Fecha no disponible',
                     style: const TextStyle(
                       color: Color(0xFF6B7280),
                       fontSize: 12,
@@ -124,7 +125,7 @@ class _RequestListItem extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      request.location,
+                      request.location ?? 'Ubicación no disponible',
                       style: const TextStyle(
                         color: Color(0xFF6B7280),
                         fontSize: 12,

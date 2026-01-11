@@ -35,19 +35,33 @@ class RequestsRemoteDataSourceImpl implements RequestsRemoteDataSource {
     String? categoryId,
   }) async {
     try {
-      var query = supabaseClient.from('requests').select();
+      var query = supabaseClient.from('solicitudes').select('''
+        *,
+        eventos (
+          id,
+          titulo,
+          tipo_evento_id,
+          fecha_evento,
+          hora_evento,
+          nombre_lugar,
+          direccion,
+          numero_invitados,
+          presupuesto_total,
+          estado
+        )
+      ''');
 
       if (userId != null) {
-        query = query.eq('client_id', userId);
+        query = query.eq('cliente_usuario_id', userId);
       }
       if (status != null) {
-        query = query.eq('status', status);
+        query = query.eq('estado', status);
       }
       if (categoryId != null) {
-        query = query.eq('category_id', categoryId);
+        query = query.eq('categoria_servicio_id', categoryId);
       }
 
-      final response = await query.order('created_at', ascending: false);
+      final response = await query.order('creado_en', ascending: false);
 
       return (response as List)
           .map((json) => RequestModel.fromJson(json as Map<String, dynamic>))
@@ -61,12 +75,12 @@ class RequestsRemoteDataSourceImpl implements RequestsRemoteDataSource {
   Future<RequestModel> getRequestById(String id) async {
     try {
       final response = await supabaseClient
-          .from('requests')
-          .select()
+          .from('solicitudes')
+          .select('*, eventos(*)')
           .eq('id', id)
           .single();
 
-      return RequestModel.fromJson(response as Map<String, dynamic>);
+      return RequestModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch request: $e');
     }
@@ -76,12 +90,12 @@ class RequestsRemoteDataSourceImpl implements RequestsRemoteDataSource {
   Future<RequestModel> createRequest(RequestModel request) async {
     try {
       final response = await supabaseClient
-          .from('requests')
+          .from('solicitudes')
           .insert(request.toJson())
           .select()
           .single();
 
-      return RequestModel.fromJson(response as Map<String, dynamic>);
+      return RequestModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create request: $e');
     }
@@ -91,7 +105,7 @@ class RequestsRemoteDataSourceImpl implements RequestsRemoteDataSource {
   Future<RequestModel> updateRequest(RequestModel request) async {
     try {
       final response = await supabaseClient
-          .from('requests')
+          .from('solicitudes')
           .update(request.toJson())
           .eq('id', request.id)
           .select()
@@ -106,7 +120,7 @@ class RequestsRemoteDataSourceImpl implements RequestsRemoteDataSource {
   @override
   Future<void> deleteRequest(String id) async {
     try {
-      await supabaseClient.from('requests').delete().eq('id', id);
+      await supabaseClient.from('solicitudes').delete().eq('id', id);
     } catch (e) {
       throw Exception('Failed to delete request: $e');
     }

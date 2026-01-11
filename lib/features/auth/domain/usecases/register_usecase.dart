@@ -10,6 +10,8 @@ class RegisterParams {
   final String role;
   final String phone;
   final String businessName;
+  final String description;
+  final String categoryId;
 
   RegisterParams({
     required this.name,
@@ -18,6 +20,8 @@ class RegisterParams {
     required this.role,
     required this.phone,
     this.businessName = '',
+    this.description = '',
+    this.categoryId = '',
   });
 }
 
@@ -34,6 +38,8 @@ class RegisterUseCase {
       role: params.role,
       phone: params.phone,
       businessName: params.businessName,
+      description: params.description,
+      categoryId: params.categoryId,
     );
   }
 }

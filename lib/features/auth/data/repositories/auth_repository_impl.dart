@@ -28,6 +28,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String role,
     required String phone,
     String? businessName,
+    String? description,
+    String? categoryId,
   }) async {
     try {
       return Right(
@@ -38,6 +40,8 @@ class AuthRepositoryImpl implements AuthRepository {
           role: role,
           phone: phone,
           businessName: businessName,
+          description: description,
+          categoryId: categoryId,
         ),
       );
     } on EmailConfirmationRequiredException catch (e) {
@@ -59,7 +63,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> createRequest(params) async {
+  Future<Either<Failure, String>> createRequest(params) async {
     try {
       return Right(await _remoteDataSource.createRequest(params));
     } catch (e) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PartyType {
   const PartyType({
@@ -14,29 +15,43 @@ class PartyType {
 
 final _partyTypes = [
   const PartyType(
-    id: '1',
+    id: '550e8400-e29b-41d4-a716-446655440011', // Boda
     name: 'Boda',
     imageUrl: 'https://picsum.photos/id/237/400/300',
   ),
   const PartyType(
-    id: '2',
+    id: '550e8400-e29b-41d4-a716-446655440012', // XV Años
     name: 'XV Años',
     imageUrl: 'https://picsum.photos/id/160/400/300',
   ),
   const PartyType(
-    id: '3',
-    name: 'Infantil',
+    id: '550e8400-e29b-41d4-a716-446655440013', // Cumpleaños
+    name: 'Cumpleaños',
     imageUrl: 'https://picsum.photos/id/214/400/300',
   ),
   const PartyType(
-    id: '4',
+    id: '550e8400-e29b-41d4-a716-446655440016', // Corporativo
     name: 'Corporativo',
     imageUrl: 'https://picsum.photos/id/350/400/300',
   ),
 ];
 
-class PartyTypePage extends StatelessWidget {
+class PartyTypePage extends StatefulWidget {
   const PartyTypePage({super.key});
+
+  @override
+  State<PartyTypePage> createState() => _PartyTypePageState();
+}
+
+class _PartyTypePageState extends State<PartyTypePage> {
+  Future<void> _saveSelectedPartyType(String partyTypeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_party_type_id', partyTypeId);
+    await prefs.setString(
+      'selected_party_type_name',
+      _partyTypes.firstWhere((type) => type.id == partyTypeId).name,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +84,10 @@ class PartyTypePage extends StatelessWidget {
         itemCount: _partyTypes.length,
         itemBuilder: (context, index) {
           final party = _partyTypes[index];
-          return _PartyTypeCard(party: party);
+          return _PartyTypeCard(
+            party: party,
+            onPartySelected: _saveSelectedPartyType,
+          );
         },
       ),
     );
@@ -77,13 +95,19 @@ class PartyTypePage extends StatelessWidget {
 }
 
 class _PartyTypeCard extends StatelessWidget {
-  const _PartyTypeCard({required this.party});
+  const _PartyTypeCard({required this.party, required this.onPartySelected});
   final PartyType party;
+  final Function(String) onPartySelected;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go('/client/home'),
+      onTap: () async {
+        await onPartySelected(party.id);
+        if (context.mounted) {
+          context.go('/client/home');
+        }
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Stack(

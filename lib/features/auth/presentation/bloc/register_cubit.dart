@@ -35,6 +35,14 @@ class RegisterCubit extends Cubit<RegisterState> {
     emit(state.copyWith(businessName: value, status: RegisterStatus.pure));
   }
 
+  void descriptionChanged(String value) {
+    emit(state.copyWith(description: value, status: RegisterStatus.pure));
+  }
+
+  void categoryIdChanged(String value) {
+    emit(state.copyWith(categoryId: value, status: RegisterStatus.pure));
+  }
+
   Future<void> registerWithCredentials() async {
     if (state.status == RegisterStatus.submissionInProgress) return;
     emit(state.copyWith(status: RegisterStatus.submissionInProgress));
@@ -47,6 +55,8 @@ class RegisterCubit extends Cubit<RegisterState> {
         role: state.role,
         phone: state.phone,
         businessName: state.businessName,
+        description: state.description,
+        categoryId: state.categoryId,
       ),
     );
 
@@ -65,7 +75,12 @@ class RegisterCubit extends Cubit<RegisterState> {
             ),
           );
         } else {
-          emit(state.copyWith(status: RegisterStatus.submissionFailure));
+          emit(
+            state.copyWith(
+              status: RegisterStatus.submissionFailure,
+              errorMessage: failure.message,
+            ),
+          );
         }
       },
       (user) => emit(

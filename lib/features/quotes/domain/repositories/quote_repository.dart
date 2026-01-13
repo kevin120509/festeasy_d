@@ -21,4 +21,10 @@ abstract class QuoteRepository {
 
   /// Reject a quote (client)
   Future<Either<Failure, Quote>> rejectQuote(String quoteId);
+
+  /// Delete a quote (provider)
+  Future<Either<Failure, void>> deleteQuote(String quoteId);
+
+  /// Update an existing quote (provider) - only editable while pending
+  Future<Either<Failure, Quote>> updateQuote(Quote quote);
 }

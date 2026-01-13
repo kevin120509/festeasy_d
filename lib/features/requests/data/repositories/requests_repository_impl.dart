@@ -21,6 +21,20 @@ class RequestsRepositoryImpl implements RequestsRepository {
   }
 
   @override
+  Future<Either<Failure, List<Request>>> getProviderNewRequests({
+    required String providerUserId,
+  }) async {
+    try {
+      final requests = await _remoteDataSource.getProviderNewRequests(
+        providerUserId: providerUserId,
+      );
+      return Right(List<Request>.from(requests));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Request>> getRequestById(String id) async {
     try {
       final requestModel = await _remoteDataSource.getRequestById(id);

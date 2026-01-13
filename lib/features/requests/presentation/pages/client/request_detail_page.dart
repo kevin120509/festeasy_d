@@ -2,6 +2,10 @@ import 'package:festeasy/features/requests/data/datasources/requests_remote_data
 import 'package:festeasy/features/requests/data/repositories/requests_repository_impl.dart';
 import 'package:festeasy/features/requests/domain/usecases/get_request_by_id_usecase.dart';
 import 'package:festeasy/features/requests/presentation/bloc/request_detail_cubit.dart';
+import 'package:festeasy/features/quotes/domain/entities/quote.dart';
+import 'package:festeasy/features/quotes/domain/usecases/accept_quote.dart';
+import 'package:festeasy/features/quotes/domain/usecases/get_quotes_for_request.dart';
+import 'package:festeasy/features/quotes/domain/usecases/reject_quote.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -24,13 +28,92 @@ class ClientRequestDetailPage extends StatelessWidget {
           ),
         ),
       )..loadRequest(requestId),
-      child: const ClientRequestDetailView(),
+      child: ClientRequestDetailView(requestId: requestId),
     );
   }
 }
 
-class ClientRequestDetailView extends StatelessWidget {
-  const ClientRequestDetailView({super.key});
+class ClientRequestDetailView extends StatefulWidget {
+  const ClientRequestDetailView({super.key, required this.requestId});
+
+  final String requestId;
+
+  @override
+  State<ClientRequestDetailView> createState() =>
+      _ClientRequestDetailViewState();
+}
+
+class _ClientRequestDetailViewState extends State<ClientRequestDetailView> {
+  List<Quote>? _quotes;
+  bool _isLoadingQuotes = true;
+  String? _quotesError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuotes();
+  }
+
+  Future<void> _loadQuotes() async {
+    setState(() {
+      _isLoadingQuotes = true;
+      _quotesError = null;
+    });
+
+    final getQuotes = context.read<GetQuotesForRequest>();
+    final result = await getQuotes(widget.requestId);
+
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        setState(() {
+          _quotesError = failure.message;
+          _isLoadingQuotes = false;
+        });
+      },
+      (quotes) {
+        setState(() {
+          _quotes = quotes;
+          _isLoadingQuotes = false;
+        });
+      },
+    );
+  }
+
+  Future<void> _acceptQuote(String quoteId) async {
+    final acceptQuote = context.read<AcceptQuote>();
+    final result = await acceptQuote(quoteId);
+    if (!mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${failure.message}')),
+      ),
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cotización aceptada')),
+        );
+        _loadQuotes();
+      },
+    );
+  }
+
+  Future<void> _rejectQuote(String quoteId) async {
+    final rejectQuote = context.read<RejectQuote>();
+    final result = await rejectQuote(quoteId);
+    if (!mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${failure.message}')),
+      ),
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cotización rechazada')),
+        );
+        _loadQuotes();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,16 +259,96 @@ class ClientRequestDetailView extends StatelessWidget {
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  // Placeholder for proposals
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'No hay propuestas todavía.',
-                        style: TextStyle(color: Colors.grey),
+                  if (_isLoadingQuotes)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_quotesError != null)
+                    Center(
+                      child: Column(
+                        children: [
+                          Text('Error: $_quotesError'),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: _loadQuotes,
+                            child: const Text('Reintentar'),
+                          ),
+                        ],
                       ),
+                    )
+                  else if (_quotes == null || _quotes!.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          'No hay propuestas todavía.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _quotes!.length,
+                      itemBuilder: (context, index) {
+                        final quote = _quotes![index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _statusLabel(quote.status),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: _statusColor(quote.status),
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$${quote.proposedPrice.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (quote.notes != null &&
+                                    quote.notes!.trim().isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    quote.notes!,
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ],
+                                if (quote.isPending) ...[
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () => _rejectQuote(quote.id),
+                                        child: const Text('Rechazar'),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton(
+                                        onPressed: () => _acceptQuote(quote.id),
+                                        child: const Text('Aceptar'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
                 ],
               ),
             );
@@ -194,6 +357,36 @@ class ClientRequestDetailView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'aceptada':
+      case 'accepted':
+        return Colors.green;
+      case 'rechazada':
+      case 'rejected':
+        return Colors.red;
+      case 'pendiente':
+      case 'pending':
+      default:
+        return Colors.orange;
+    }
+  }
+
+  String _statusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'aceptada':
+      case 'accepted':
+        return 'Aceptada';
+      case 'rechazada':
+      case 'rejected':
+        return 'Rechazada';
+      case 'pendiente':
+      case 'pending':
+      default:
+        return 'Pendiente';
+    }
   }
 }
 

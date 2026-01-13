@@ -46,7 +46,6 @@ class ServiceRequestView extends StatefulWidget {
 }
 
 class _ServiceRequestViewState extends State<ServiceRequestView> {
-  String? _savedEventTypeId;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _dateController = TextEditingController();
@@ -124,6 +123,10 @@ class _ServiceRequestViewState extends State<ServiceRequestView> {
 
     // Si no hay categorías de la base de datos, usar categorías de respaldo con UUIDs
     final fallbackCategories = [
+      const ServiceCategory(
+        id: '11111111-1111-1111-1111-111111111111',
+        name: 'Mobiliario',
+      ),
       const ServiceCategory(
         id: '550e8400-e29b-41d4-a716-446655440001',
         name: 'Catering',

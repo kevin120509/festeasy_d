@@ -1,4 +1,5 @@
 import 'package:festeasy/features/requests/domain/entities/request.dart';
+import 'package:festeasy/features/requests/domain/usecases/get_provider_new_requests_usecase.dart';
 import 'package:festeasy/features/requests/domain/usecases/get_requests_usecase.dart';
 import 'package:festeasy/features/requests/presentation/bloc/requests_cubit.dart';
 import 'package:festeasy/shared/widgets/client_components.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:festeasy/features/quotes/domain/usecases/get_quotes_for_request.dart';
+import 'package:provider/provider.dart';
 
 class ClientRequestsPage extends StatelessWidget {
   const ClientRequestsPage({super.key});
@@ -16,8 +19,10 @@ class ClientRequestsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) {
         final user = Supabase.instance.client.auth.currentUser;
-        return RequestsCubit(context.read<GetRequestsUseCase>())
-          ..loadClientRequests(user?.id ?? '');
+        return RequestsCubit(
+          context.read<GetRequestsUseCase>(),
+          context.read<GetProviderNewRequestsUseCase>(),
+        )..loadClientRequests(user?.id ?? '');
       },
       child: const ClientRequestsView(),
     );
@@ -151,112 +156,132 @@ class _ClientRequestsViewState extends State<ClientRequestsView> {
   }
 }
 
-class _RequestCard extends StatelessWidget {
+class _RequestCard extends StatefulWidget {
   const _RequestCard({required this.request});
-
   final Request request;
 
   @override
+  State<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends State<_RequestCard> {
+  int _quotesCount = 0;
+  bool _loadingQuotes = true;
+  String? _error;
+  String? _acceptedQuoteId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuotesCount();
+  }
+
+  Future<void> _loadQuotesCount() async {
+    setState(() { _loadingQuotes = true; });
+    final getQuotes = context.read<GetQuotesForRequest>();
+    final result = await getQuotes(widget.request.id);
+    result.fold(
+      (failure) {
+        setState(() { _error = failure.message; _loadingQuotes = false; });
+      },
+      (quotes) {
+        setState(() {
+          _quotesCount = quotes.length;
+          final accepted = quotes.where((q) => q.status.toLowerCase() == 'aceptada' || q.status.toLowerCase() == 'hecho').toList();
+          _acceptedQuoteId = accepted.isNotEmpty ? accepted.first.id : null;
+          _loadingQuotes = false;
+        });
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool isActive = request.status == 'abierta';
+    final request = widget.request;
+    final bool isDone = _acceptedQuoteId != null;
+    final bool isPending = !isDone;
     final dateFormat = DateFormat('dd MMM yyyy');
 
-    String getStatusText(String status) {
-      switch (status) {
-        case 'abierta':
-          return 'Abierta';
-        case 'enviada':
-          return 'Enviada';
-        case 'cotizada':
-          return 'Cotizada';
-        case 'contratada':
-          return 'Contratada';
-        case 'cancelada':
-          return 'Cancelada';
-        case 'expirada':
-          return 'Expirada';
-        default:
-          return status;
-      }
+    String getStatusText() {
+      if (isDone) return 'Hecho';
+      return 'Pendiente';
     }
 
-    return Container(
+    Color getStatusColor() {
+      if (isDone) return const Color(0xFF22C55E); // verde
+      return Colors.grey;
+    }
+
+    return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            request.title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          if (request.eventDate != null) ...[
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  dateFormat.format(request.eventDate!),
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                if (request.location != null) ...[
-                  const SizedBox(width: 16),
-                  const Icon(Icons.location_on, size: 14, color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(request.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            if (request.eventDate != null) ...[
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      request.location!,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  Text(
+                    dateFormat.format(request.eventDate!),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
+                  if (request.location != null) ...[
+                    const SizedBox(width: 16),
+                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        request.location!,
+                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            Text(
+              request.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Estado: ${getStatusText()}',
+                      style: TextStyle(
+                        color: getStatusColor(),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    _loadingQuotes
+                        ? const Text('Cargando propuestas...')
+                        : Text('$_quotesCount propuestas recibidas'),
+                  ],
+                ),
+                SizedBox(
+                  width: 120,
+                  child: ClientButton(
+                    text: 'Revisar',
+                    onPressed: () => context.push('/client/request-detail/${request.id}'),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
           ],
-          Text(
-            request.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Estado: ${getStatusText(request.status)}',
-                    style: TextStyle(
-                      color: isActive ? const Color(0xFF22C55E) : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    '0 propuestas recibidas',
-                  ), // TODO: Implementar conteo de cotizaciones
-                ],
-              ),
-              SizedBox(
-                width: 120,
-                child: ClientButton(
-                  text: 'Revisar',
-                  onPressed: () =>
-                      context.push('/client/request-detail/${request.id}'),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

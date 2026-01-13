@@ -1,19 +1,44 @@
+import 'package:festeasy/app/router/auth_service.dart';
+import 'package:festeasy/features/profile/domain/entities/provider_profile.dart';
+import 'package:festeasy/features/profile/domain/usecases/get_provider_profile_usecase.dart';
+import 'package:festeasy/features/profile/domain/usecases/update_provider_profile_usecase.dart';
+import 'package:festeasy/features/profile/presentation/bloc/provider_profile_cubit.dart';
+import 'package:festeasy/features/profile/presentation/bloc/provider_profile_state.dart';
 import 'package:festeasy/shared/widgets/global_components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      return const Center(child: Text('Usuario no autenticado'));
+    }
+
+    return BlocProvider(
+      create: (context) => ProviderProfileCubit(
+        context.read<GetProviderProfileUseCase>(),
+        context.read<UpdateProviderProfileUseCase>(),
+      )..loadProfile(user.id),
+      child: const _ProfileView(),
+    );
+  }
+}
+
+class _ProfileView extends StatelessWidget {
+  const _ProfileView();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
-          onPressed: () => context.pop(),
-        ),
         title: const Text(
           'Perfil',
           style: TextStyle(
@@ -24,78 +49,127 @@ class ProfilePage extends StatelessWidget {
         ),
         backgroundColor: Colors.white,
         elevation: 1,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              final user = Supabase.instance.client.auth.currentUser;
+              if (user != null) {
+                context.read<ProviderProfileCubit>().loadProfile(user.id);
+              }
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _ProfileHeader(),
-            const SizedBox(height: 32),
-            const _SectionLabel('GESTIÓN'),
-            const SizedBox(height: 8),
-            CustomCard(
+      body: BlocBuilder<ProviderProfileCubit, ProviderProfileState>(
+        builder: (context, state) {
+          if (state.status == ProfileStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state.status == ProfileStatus.failure) {
+            return Center(
+              child: Text('Error: ${state.errorMessage ?? "Desconocido"}'),
+            );
+          } else if (state.status == ProfileStatus.success &&
+              state.profile != null) {
+            final profile = state.profile!;
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _MenuItem(
-                    icon: Icons.dashboard_outlined,
-                    text: 'Mi Negocio',
-                    color: const Color(0xFFEF4444),
-                    onTap: () {
-                      // TODO(future): Navigate to My Business Page
-                    },
+                  _ProfileHeader(profile: profile),
+                  const SizedBox(height: 32),
+                  const _SectionLabel('INFORMACIÓN DEL NEGOCIO'),
+                  const SizedBox(height: 8),
+                  CustomCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _InfoItem(
+                            icon: Icons.store,
+                            label: 'Nombre',
+                            value: profile.businessName,
+                          ),
+                          const Divider(),
+                          _InfoItem(
+                            icon: Icons.phone,
+                            label: 'Teléfono',
+                            value: profile.phone ?? 'No registrado',
+                          ),
+                          const Divider(),
+                          _InfoItem(
+                            icon: Icons.description,
+                            label: 'Descripción',
+                            value: profile.description ?? 'Sin descripción',
+                          ),
+                          const Divider(),
+                          _InfoItem(
+                            icon: Icons.location_on,
+                            label: 'Ubicación (Clave)',
+                            value: profile.locationKey ?? 'No registrada',
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const Divider(
-                    height: 1,
-                    indent: 56,
-                    color: Color(0xFFF3F4F6),
+                  const SizedBox(height: 24),
+                  const _SectionLabel('GESTIÓN'),
+                  const SizedBox(height: 8),
+                  CustomCard(
+                    child: Column(
+                      children: [
+                        _MenuItem(
+                          icon: Icons.article_outlined,
+                          text: 'Mis Servicios',
+                          color: const Color(0xFFEF4444),
+                          onTap: () => context.push('/provider/dashboard/services'),
+                        ),
+                      ],
+                    ),
                   ),
-                  _MenuItem(
-                    icon: Icons.article_outlined,
-                    text: 'Mis Servicios',
-                    color: const Color(0xFFEF4444),
-                    onTap: () => context.push('/services'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            const _SectionLabel('CUENTA'),
-            const SizedBox(height: 8),
-            CustomCard(
-              child: Column(
-                children: [
-                  _MenuItem(
-                    icon: Icons.settings_outlined,
-                    text: 'Configuración',
-                    color: const Color(0xFF6B7280),
-                    onTap: () => context.push('/settings'),
-                  ),
-                  const Divider(
-                    height: 1,
-                    indent: 56,
-                    color: Color(0xFFF3F4F6),
-                  ),
+                  const SizedBox(height: 24),
+                  const _SectionLabel('CUENTA'),
+                  const SizedBox(height: 8),
+                  CustomCard(
+                    child: Column(
+                      children: [
                   _MenuItem(
                     icon: Icons.logout,
                     text: 'Cerrar Sesión',
                     color: const Color(0xFFEF4444),
-                    onTap: () {
-                      // TODO(auth): Implement logout logic
+                    onTap: () async {
+                      // 1. Sign out from Supabase
+                      await Supabase.instance.client.auth.signOut();
+
+                      // 2. Update local AuthService state to trigger Router redirect
+                      if (context.mounted) {
+                        provider.Provider.of<AuthService>(context, listen: false)
+                            .logout();
+                        // 3. Fallback explicit navigation
+                        context.go('/');
+                      }
                     },
+                  ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+            );
+          }
+          return const Center(child: Text('No hay información de perfil'));
+        },
       ),
     );
   }
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  const _ProfileHeader({required this.profile});
+
+  final ProviderProfile profile;
 
   @override
   Widget build(BuildContext context) {
@@ -113,47 +187,39 @@ class _ProfileHeader extends StatelessWidget {
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 50,
-              backgroundColor: Color(0xFFFEF3C7),
-              child: Text(
-                'FF',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFD97706),
-                ),
-              ),
+              backgroundColor: const Color(0xFFFEF3C7),
+              backgroundImage: profile.avatarUrl != null
+                  ? NetworkImage(profile.avatarUrl!)
+                  : null,
+              child: profile.avatarUrl == null
+                  ? Text(
+                      profile.businessName.substring(0, 2).toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFD97706),
+                      ),
+                    )
+                  : null,
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'FestaFusion Catering',
-            style: TextStyle(
+          Text(
+            profile.businessName,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1F2937),
             ),
           ),
-          const SizedBox(height: 4),
-          const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.star, color: Color(0xFFD97706), size: 16),
-              SizedBox(width: 4),
-              Text(
-                '4.8 (124 reviews)',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFFD97706),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: () => context.push('/profile/edit'),
+            onPressed: () => context.push(
+              '/provider/dashboard/profile/edit',
+              extra: profile, // Pass the profile object
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -169,6 +235,52 @@ class _ProfileHeader extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoItem extends StatelessWidget {
+  const _InfoItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+                ),
+              ],
             ),
           ),
         ],

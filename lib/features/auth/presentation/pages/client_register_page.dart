@@ -1,9 +1,11 @@
 import 'package:festeasy/features/auth/domain/usecases/register_usecase.dart';
 import 'package:festeasy/features/auth/presentation/bloc/register_cubit.dart';
+import 'package:festeasy/features/auth/domain/entities/service_category.dart';
 import 'package:festeasy/shared/widgets/client_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ClientRegisterPage extends StatelessWidget {
   const ClientRegisterPage({super.key});
@@ -32,6 +34,53 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
   final _passwordController = TextEditingController();
   final _businessNameController = TextEditingController();
 
+  List<ServiceCategory> _serviceCategories = [];
+  String? _selectedServiceCategoryId;
+  bool _loadingServiceCategories = false;
+
+  Future<void> _fetchServiceCategories() async {
+    if (_loadingServiceCategories) return;
+    setState(() => _loadingServiceCategories = true);
+    try {
+      final response = await Supabase.instance.client
+          .from('categorias_servicio')
+          .select('id, nombre, descripcion, icono')
+          .eq('activa', true)
+          .order('nombre');
+
+      final categories = (response as List)
+          .map(
+            (e) => ServiceCategory(
+              id: (e as Map<String, dynamic>)['id'] as String,
+              name: e['nombre'] as String,
+              description: e['descripcion'] as String?,
+              icon: e['icono'] as String?,
+            ),
+          )
+          .toList();
+
+      if (!mounted) return;
+      setState(() => _serviceCategories = categories);
+    } catch (_) {
+      // fallback (mismos UUIDs que en basededatos.sql)
+      if (!mounted) return;
+      setState(() {
+        _serviceCategories = const [
+          ServiceCategory(id: '11111111-1111-1111-1111-111111111111', name: 'Mobiliario'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440001', name: 'Catering'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440002', name: 'Música'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440003', name: 'Fotografía'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440004', name: 'Decoración'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440005', name: 'Lugar'),
+          ServiceCategory(id: '550e8400-e29b-41d4-a716-446655440006', name: 'Transporte'),
+        ];
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() => _loadingServiceCategories = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +101,9 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
         _businessNameController.text,
       );
     });
+
+    // Cargar categorías para el selector de proveedores
+    _fetchServiceCategories();
   }
 
   @override
@@ -174,6 +226,40 @@ class _ClientRegisterViewState extends State<ClientRegisterView> {
                             icon: Icons.store_outlined,
                             controller: _businessNameController,
                           ),
+                          const SizedBox(height: 24),
+                          DropdownButtonFormField<String>(
+                            value: _selectedServiceCategoryId,
+                            decoration: const InputDecoration(
+                              labelText: 'Categoría del servicio *',
+                              prefixIcon: Icon(Icons.category_outlined),
+                              border: OutlineInputBorder(),
+                            ),
+                            items: _serviceCategories
+                                .map(
+                                  (c) => DropdownMenuItem<String>(
+                                    value: c.id,
+                                    child: Text(c.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() => _selectedServiceCategoryId = value);
+                              context.read<RegisterCubit>().categoryIdChanged(
+                                    value ?? '',
+                                  );
+                            },
+                            validator: (value) {
+                              if (state.role != 'provider') return null;
+                              if (value == null || value.isEmpty) {
+                                return 'Selecciona una categoría';
+                              }
+                              return null;
+                            },
+                          ),
+                          if (_loadingServiceCategories) ...[
+                            const SizedBox(height: 12),
+                            const LinearProgressIndicator(),
+                          ],
                         ],
                       ],
                     );

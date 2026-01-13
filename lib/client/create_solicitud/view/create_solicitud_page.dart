@@ -48,6 +48,10 @@ class _CreateSolicitudPageState extends State<CreateSolicitudPage> {
           setState(() {
             _categories = [
               const ServiceCategory(
+                id: '11111111-1111-1111-1111-111111111111',
+                name: 'Mobiliario',
+              ),
+              const ServiceCategory(
                 id: '550e8400-e29b-41d4-a716-446655440001',
                 name: 'Catering',
               ),
@@ -79,6 +83,10 @@ class _CreateSolicitudPageState extends State<CreateSolicitudPage> {
             _categories = categories.isNotEmpty
                 ? categories
                 : [
+                    const ServiceCategory(
+                      id: '11111111-1111-1111-1111-111111111111',
+                      name: 'Mobiliario',
+                    ),
                     const ServiceCategory(
                       id: '550e8400-e29b-41d4-a716-446655440001',
                       name: 'Catering',

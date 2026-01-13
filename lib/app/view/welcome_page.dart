@@ -46,7 +46,7 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                'Tu evento perfecto, sin estrés.',
+                'tu fiesta facil y a un click de distancia',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
               ),

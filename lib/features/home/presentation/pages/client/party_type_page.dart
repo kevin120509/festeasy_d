@@ -97,7 +97,7 @@ class _PartyTypePageState extends State<PartyTypePage> {
 class _PartyTypeCard extends StatelessWidget {
   const _PartyTypeCard({required this.party, required this.onPartySelected});
   final PartyType party;
-  final Function(String) onPartySelected;
+  final Future<void> Function(String) onPartySelected;
 
   @override
   Widget build(BuildContext context) {

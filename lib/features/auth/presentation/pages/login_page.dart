@@ -31,18 +31,20 @@ class LoginForm extends StatelessWidget {
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
         if (state.status.isSubmissionSuccess) {
-          // Set auth state first
-          context.read<AuthService>().login();
-
-          // Navigate based on user role
+          // Set auth state with user data
           if (state.user != null) {
+            context.read<AuthService>().loginWithUser(state.user!);
+            
+            // Navigate based on user role
+            print('🔍 DEBUG: Login exitoso, rol = ${state.user!.role}');
             if (state.user!.role == 'provider') {
               context.go('/provider/dashboard');
             } else {
               context.go('/client/party-type');
             }
           } else {
-            // Fallback if user is null
+            // Fallback if user is null - just login and go to client
+            context.read<AuthService>().login();
             context.go('/client/party-type');
           }
         } else if (state.status.isSubmissionFailure) {
@@ -111,7 +113,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Tu fiesta, fácil y a un clic',
+          'tu fiesta facil y a un click de distancia',
           style: TextStyle(fontSize: 16, color: Color(0xFF6B7280)),
         ),
       ],

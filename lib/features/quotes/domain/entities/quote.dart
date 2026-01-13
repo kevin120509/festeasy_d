@@ -7,9 +7,10 @@ class Quote extends Equatable {
   final String serviceId;
   final double proposedPrice;
   final Map<String, dynamic> breakdown;
-  final String notes;
-  final DateTime validUntil;
+  final String? notes;
+  final DateTime? validUntil;
   final String status;
+  final DateTime createdAt;
 
   const Quote({
     required this.id,
@@ -18,10 +19,17 @@ class Quote extends Equatable {
     required this.serviceId,
     required this.proposedPrice,
     required this.breakdown,
-    required this.notes,
-    required this.validUntil,
+    this.notes,
+    this.validUntil,
     required this.status,
+    required this.createdAt,
   });
+
+  /// Returns true if the quote is pending
+  bool get isPending {
+    final normalized = status.trim().toLowerCase();
+    return normalized == 'pendiente' || normalized == 'pending';
+  }
 
   @override
   List<Object?> get props => [
@@ -34,5 +42,6 @@ class Quote extends Equatable {
         notes,
         validUntil,
         status,
+        createdAt,
       ];
 }

@@ -17,6 +17,12 @@ abstract class QuoteRemoteDataSource {
 
   /// Update quote status (accept/reject)
   Future<QuoteModel> updateQuoteStatus(String quoteId, String status);
+
+  /// Delete a quote by ID
+  Future<void> deleteQuote(String quoteId);
+
+  /// Update an existing quote
+  Future<QuoteModel> updateQuote(QuoteModel quote);
 }
 
 class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
@@ -28,10 +34,10 @@ class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
   Future<List<QuoteModel>> getQuotesForRequest(String requestId) async {
     try {
       final response = await supabaseClient
-          .from('quotes')
+          .from('cotizaciones')
           .select()
-          .eq('request_id', requestId)
-          .order('created_at', ascending: false);
+          .eq('solicitud_id', requestId)
+          .order('creado_en', ascending: false);
 
       return (response as List)
           .map((json) => QuoteModel.fromJson(json as Map<String, dynamic>))
@@ -45,10 +51,10 @@ class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
   Future<List<QuoteModel>> getQuotesByProvider(String providerId) async {
     try {
       final response = await supabaseClient
-          .from('quotes')
+          .from('cotizaciones')
           .select()
-          .eq('provider_id', providerId)
-          .order('created_at', ascending: false);
+          .eq('proveedor_usuario_id', providerId)
+          .order('creado_en', ascending: false);
 
       return (response as List)
           .map((json) => QuoteModel.fromJson(json as Map<String, dynamic>))
@@ -62,12 +68,12 @@ class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
   Future<QuoteModel> getQuoteById(String id) async {
     try {
       final response = await supabaseClient
-          .from('quotes')
+          .from('cotizaciones')
           .select()
           .eq('id', id)
           .single();
 
-      return QuoteModel.fromJson(response as Map<String, dynamic>);
+      return QuoteModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch quote: $e');
     }
@@ -77,12 +83,12 @@ class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
   Future<QuoteModel> createQuote(QuoteModel quote) async {
     try {
       final response = await supabaseClient
-          .from('quotes')
+          .from('cotizaciones')
           .insert(quote.toJson())
           .select()
           .single();
 
-      return QuoteModel.fromJson(response as Map<String, dynamic>);
+      return QuoteModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to create quote: $e');
     }
@@ -92,18 +98,48 @@ class QuoteRemoteDataSourceImpl implements QuoteRemoteDataSource {
   Future<QuoteModel> updateQuoteStatus(String quoteId, String status) async {
     try {
       final response = await supabaseClient
-          .from('quotes')
+          .from('cotizaciones')
           .update({
-            'status': status,
-            'updated_at': DateTime.now().toIso8601String(),
+            'estado': status,
+            'actualizado_en': DateTime.now().toIso8601String(),
           })
           .eq('id', quoteId)
           .select()
           .single();
 
-      return QuoteModel.fromJson(response as Map<String, dynamic>);
+      return QuoteModel.fromJson(response);
     } catch (e) {
       throw Exception('Failed to update quote status: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteQuote(String quoteId) async {
+    try {
+      await supabaseClient.from('cotizaciones').delete().eq('id', quoteId);
+    } catch (e) {
+      throw Exception('Failed to delete quote: $e');
+    }
+  }
+
+  @override
+  Future<QuoteModel> updateQuote(QuoteModel quote) async {
+    try {
+      final response = await supabaseClient
+          .from('cotizaciones')
+          .update({
+            'precio_propuesto': quote.proposedPrice,
+            'notas': quote.notes,
+            'valida_hasta': quote.validUntil?.toIso8601String().split('T')[0],
+            'actualizado_en': DateTime.now().toIso8601String(),
+          })
+          .eq('id', quote.id)
+          .select()
+          .single();
+
+      return QuoteModel.fromJson(response);
+    } catch (e) {
+      throw Exception('Failed to update quote: $e');
     }
   }
 }

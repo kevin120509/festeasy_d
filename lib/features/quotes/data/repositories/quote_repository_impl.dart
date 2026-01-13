@@ -57,6 +57,7 @@ class QuoteRepositoryImpl implements QuoteRepository {
         notes: quote.notes,
         validUntil: quote.validUntil,
         status: quote.status,
+        createdAt: quote.createdAt,
       );
       final createdQuote = await _remoteDataSource.createQuote(quoteModel);
       return Right(createdQuote);
@@ -70,7 +71,7 @@ class QuoteRepositoryImpl implements QuoteRepository {
     try {
       final quote = await _remoteDataSource.updateQuoteStatus(
         quoteId,
-        'accepted',
+        'aceptada',
       );
       return Right(quote);
     } catch (e) {
@@ -83,9 +84,41 @@ class QuoteRepositoryImpl implements QuoteRepository {
     try {
       final quote = await _remoteDataSource.updateQuoteStatus(
         quoteId,
-        'rejected',
+        'rechazada',
       );
       return Right(quote);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteQuote(String quoteId) async {
+    try {
+      await _remoteDataSource.deleteQuote(quoteId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Quote>> updateQuote(Quote quote) async {
+    try {
+      final quoteModel = QuoteModel(
+        id: quote.id,
+        requestId: quote.requestId,
+        providerId: quote.providerId,
+        serviceId: quote.serviceId,
+        proposedPrice: quote.proposedPrice,
+        breakdown: quote.breakdown,
+        notes: quote.notes,
+        validUntil: quote.validUntil,
+        status: quote.status,
+        createdAt: quote.createdAt,
+      );
+      final updatedQuote = await _remoteDataSource.updateQuote(quoteModel);
+      return Right(updatedQuote);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

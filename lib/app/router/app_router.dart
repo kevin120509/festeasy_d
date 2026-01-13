@@ -288,18 +288,24 @@ class AppRouter {
     ],
     redirect: (BuildContext context, GoRouterState state) {
       final bool isAuthenticated = authService.isAuthenticated;
+      final String? userRole = authService.userRole;
       final bool isAtLoginOrWelcome =
           state.matchedLocation == '/' || state.matchedLocation == '/login';
       final bool isAtRegister = state.matchedLocation == '/client/register';
 
-      // If user is authenticated and tries to access login, welcome, or register, redirect to party type selection
+      // If user is authenticated and tries to access login, welcome, or register
       if (isAuthenticated && (isAtLoginOrWelcome || isAtRegister)) {
-        return '/client/party-type';
+        // Redirect based on user role
+        if (userRole == 'provider') {
+          return '/provider/dashboard';
+        } else {
+          return '/client/party-type';
+        }
       }
-      // Allow access to login, welcome, and register without authentication
-      // if (!isAuthenticated && !isAtLoginOrWelcome && !isAtRegister) {
-      //   return '/';
-      // }
+      // Redirect to welcome if not authenticated and trying to access a protected route
+      if (!isAuthenticated && !isAtLoginOrWelcome && !isAtRegister) {
+        return '/';
+      }
       return null;
     },
   );

@@ -8,36 +8,39 @@ class QuoteModel extends Quote {
     required super.serviceId,
     required super.proposedPrice,
     required super.breakdown,
-    required super.notes,
-    required super.validUntil,
+    super.notes,
+    super.validUntil,
     required super.status,
+    required super.createdAt,
   });
 
   factory QuoteModel.fromJson(Map<String, dynamic> json) {
     return QuoteModel(
       id: json['id'] as String,
-      requestId: json['request_id'] as String,
-      providerId: json['provider_id'] as String,
-      serviceId: json['service_id'] as String,
-      proposedPrice: (json['proposed_price'] as num).toDouble(),
-      breakdown: json['breakdown'] as Map<String, dynamic>,
-      notes: json['notes'] as String,
-      validUntil: DateTime.parse(json['valid_until'] as String),
-      status: json['status'] as String,
+      requestId: json['solicitud_id'] as String,
+      providerId: json['proveedor_usuario_id'] as String,
+      serviceId: json['paquete_id'] as String? ?? '', // Handle nullable package
+      proposedPrice: (json['precio_propuesto'] as num).toDouble(),
+      breakdown: json['desglose'] as Map<String, dynamic>? ?? {},
+      notes: json['notas'] as String?,
+      validUntil: json['valida_hasta'] != null ? DateTime.parse(json['valida_hasta'] as String) : null,
+      status: json['estado'] as String,
+      createdAt: json['creado_en'] != null ? DateTime.parse(json['creado_en'] as String) : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'request_id': requestId,
-      'provider_id': providerId,
-      'service_id': serviceId,
-      'proposed_price': proposedPrice,
-      'breakdown': breakdown,
-      'notes': notes,
-      'valid_until': validUntil.toIso8601String().split('T')[0],
-      'status': status,
+      'solicitud_id': requestId,
+      'proveedor_usuario_id': providerId,
+      'paquete_id': serviceId.isNotEmpty ? serviceId : null,
+      'precio_propuesto': proposedPrice,
+      'desglose': breakdown,
+      'notas': notes,
+      if (validUntil != null) 'valida_hasta': validUntil!.toIso8601String().split('T')[0],
+      'estado': status,
+      'creado_en': createdAt.toIso8601String(),
     };
   }
 }

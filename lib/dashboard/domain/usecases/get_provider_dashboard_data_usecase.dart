@@ -10,6 +10,7 @@ class GetProviderDashboardDataUseCase {
   Future<Either<Failure, Map<String, int>>> call(String providerId) async {
     // This is not ideal, the dashboard data should be in its own repository
     // but for the sake of simplicity we use the AuthRepository
-    return await (repository as dynamic).getProviderDashboardData(providerId);
+    final result = await (repository as dynamic).getProviderDashboardData(providerId);
+    return result as Either<Failure, Map<String, int>>;
   }
 }

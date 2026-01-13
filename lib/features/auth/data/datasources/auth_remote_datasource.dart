@@ -54,7 +54,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final userId = response.user!.id;
+      final userMetadata = response.user!.userMetadata;
       print('🔍 DEBUG: userId = $userId');
+      print('🔍 DEBUG: userMetadata = $userMetadata');
 
       // Intentar buscar perfil de cliente
       final clientProfile = await supabaseClient
@@ -76,41 +78,110 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           phone: clientProfile['telefono'] as String?,
           avatarUrl: clientProfile['avatar_url'] as String?,
         );
-      } else {
-        // Si no es cliente, buscar perfil de proveedor
-        final providerProfile = await supabaseClient
-            .from('perfil_proveedor')
-            .select()
-            .eq('usuario_id', userId)
-            .maybeSingle();
-
-        print('🔍 DEBUG: providerProfile = $providerProfile');
-
-        if (providerProfile != null) {
-          print('✅ DEBUG: Encontró perfil de PROVEEDOR');
-          return User(
-            id: userId,
-            email: response.user!.email!,
-            name: providerProfile['nombre_negocio'] as String,
-            role: 'provider',
-            roleDetail: 'normal',
-            phone: providerProfile['telefono'] as String?,
-            avatarUrl: providerProfile['avatar_url'] as String?,
-            businessName: providerProfile['nombre_negocio'] as String?,
-            description: providerProfile['descripcion'] as String?,
-            categoryId: providerProfile['categoria_principal_id'] as String?,
-          );
-        }
       }
 
-      print('⚠️ DEBUG: No encontró ningún perfil, usando fallback');
-      return User(
-        id: userId,
-        email: response.user!.email!,
-        name: 'Usuario',
-        role: 'client', // Default fallback
-        roleDetail: 'normal',
-      );
+      // Si no es cliente, buscar perfil de proveedor
+      final providerProfile = await supabaseClient
+          .from('perfil_proveedor')
+          .select()
+          .eq('usuario_id', userId)
+          .maybeSingle();
+
+      print('🔍 DEBUG: providerProfile = $providerProfile');
+
+      if (providerProfile != null) {
+        print('✅ DEBUG: Encontró perfil de PROVEEDOR');
+        return User(
+          id: userId,
+          email: response.user!.email!,
+          name: providerProfile['nombre_negocio'] as String,
+          role: 'provider',
+          roleDetail: 'normal',
+          phone: providerProfile['telefono'] as String?,
+          avatarUrl: providerProfile['avatar_url'] as String?,
+          businessName: providerProfile['nombre_negocio'] as String?,
+          description: providerProfile['descripcion'] as String?,
+          categoryId: providerProfile['categoria_principal_id'] as String?,
+        );
+      }
+
+      // No se encontró perfil - intentar crear desde metadatos del usuario
+      print('⚠️ DEBUG: No encontró ningún perfil, intentando crear desde metadatos...');
+      
+      final fullName = userMetadata?['full_name'] as String? ?? 'Usuario';
+      final role = userMetadata?['role'] as String? ?? 'client';
+      
+      print('📝 DEBUG: fullName desde metadatos = $fullName');
+      print('📝 DEBUG: role desde metadatos = $role');
+
+      // Crear registros en tablas auxiliares
+      try {
+        await supabaseClient.from('profiles').upsert({
+          'id': userId,
+          'full_name': fullName,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+        print('✅ DEBUG: Registro en profiles creado');
+      } catch (e) {
+        print('⚠️ DEBUG: Error creando registro en profiles: $e');
+      }
+
+      try {
+        await supabaseClient.from('users').upsert({
+          'id': userId,
+          'correo_electronico': email,
+          'contrasena': 'managed_by_supabase_auth',
+          'rol': role,
+          'correo_verificado_en': DateTime.now().toIso8601String(),
+          'ultimo_acceso_en': DateTime.now().toIso8601String(),
+          'estado': 'active',
+        });
+        print('✅ DEBUG: Registro en users creado');
+      } catch (e) {
+        print('⚠️ DEBUG: Error creando registro en users: $e');
+      }
+
+      // Crear el perfil que falta
+      if (role == 'client') {
+        try {
+          await supabaseClient.from('perfil_cliente').upsert({
+            'id': userId,
+            'usuario_id': userId,
+            'nombre_completo': fullName,
+          });
+          print('✅ DEBUG: Perfil de cliente creado exitosamente');
+        } catch (e) {
+          print('⚠️ DEBUG: Error creando perfil de cliente: $e');
+        }
+        
+        return User(
+          id: userId,
+          email: response.user!.email!,
+          name: fullName,
+          role: 'client',
+          roleDetail: 'normal',
+        );
+      } else {
+        try {
+          await supabaseClient.from('perfil_proveedor').upsert({
+            'id': userId,
+            'usuario_id': userId,
+            'nombre_negocio': fullName,
+          });
+          print('✅ DEBUG: Perfil de proveedor creado exitosamente');
+        } catch (e) {
+          print('⚠️ DEBUG: Error creando perfil de proveedor: $e');
+        }
+        
+        return User(
+          id: userId,
+          email: response.user!.email!,
+          name: fullName,
+          role: 'provider',
+          roleDetail: 'normal',
+          businessName: fullName,
+        );
+      }
     } catch (e) {
       print('❌ DEBUG: Error en login: $e');
       throw Exception('Login error: $e');
@@ -140,20 +211,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'full_name': name,
           'role': role,
+          'phone': phone,
+          'businessName': businessName,
+          'categoryId': categoryId,
         },
       );
 
       print('✅ DEBUG: Supabase Auth signUp exitoso');
+      print('📝 DEBUG: response.user = ${response.user}');
+      print('📝 DEBUG: response.session = ${response.session}');
 
+      // Verificar si el usuario fue creado (puede existir sin sesión si requiere confirmación)
       if (response.user == null) {
         print(
-          '⚠️ DEBUG: response.user es null, lanzando EmailConfirmationRequiredException',
+          '❌ DEBUG: response.user es null, el registro falló completamente',
         );
-        throw EmailConfirmationRequiredException();
+        throw Exception('Registration failed: No user returned');
       }
 
       final userId = response.user!.id;
+      final needsEmailConfirmation = response.session == null;
       print('📝 DEBUG: userId = $userId');
+      print('📝 DEBUG: needsEmailConfirmation = $needsEmailConfirmation');
 
       // 1. Insertar en tabla 'profiles' (requerida por Supabase auth)
       try {
@@ -165,8 +244,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         });
         print('✅ DEBUG: Inserción en profiles exitosa');
       } catch (e) {
-        print('❌ DEBUG: Error insertando en profiles: $e');
-        rethrow;
+        print('⚠️ DEBUG: Error insertando en profiles (puede ser RLS): $e');
+        // Continuar aunque falle - puede ser un problema de RLS sin sesión
       }
 
       // 2. Insertar en tabla pública 'users'
@@ -183,8 +262,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         });
         print('✅ DEBUG: Inserción en users exitosa');
       } catch (e) {
-        print('❌ DEBUG: Error insertando en users: $e');
-        rethrow;
+        print('⚠️ DEBUG: Error insertando en users (puede ser RLS): $e');
+        // Continuar aunque falle - puede ser un problema de RLS sin sesión
       }
 
       // 3. Insertar en perfil específico
@@ -199,11 +278,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           };
           print('📝 DEBUG: clientData = $clientData');
 
-          await supabaseClient.from('perfil_cliente').insert(clientData);
+          await supabaseClient.from('perfil_cliente').upsert(clientData);
           print('✅ DEBUG: Inserción en perfil_cliente exitosa');
         } catch (e) {
-          print('❌ DEBUG: Error insertando en perfil_cliente: $e');
-          rethrow;
+          print('⚠️ DEBUG: Error insertando en perfil_cliente (puede ser RLS): $e');
+          // Continuar aunque falle - puede ser un problema de RLS sin sesión
         }
       } else {
         try {
@@ -220,15 +299,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           };
           print('📝 DEBUG: providerData = $providerData');
 
-          await supabaseClient.from('perfil_proveedor').insert(providerData);
+          await supabaseClient.from('perfil_proveedor').upsert(providerData);
           print('✅ DEBUG: Inserción en perfil_proveedor exitosa');
         } catch (e) {
-          print('❌ DEBUG: Error insertando en perfil_proveedor: $e');
-          rethrow;
+          print('⚠️ DEBUG: Error insertando en perfil_proveedor (puede ser RLS): $e');
+          // Continuar aunque falle - puede ser un problema de RLS sin sesión
         }
       }
 
       print('✅ DEBUG: Registro completado exitosamente');
+      
+      // Si se requiere confirmación de email, lanzar excepción DESPUÉS de guardar los perfiles
+      if (needsEmailConfirmation) {
+        print('📧 DEBUG: Se requiere confirmación de email');
+        throw EmailConfirmationRequiredException();
+      }
+      
       return User(
         id: userId,
         email: response.user!.email!,
@@ -365,9 +451,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (addressStr.isNotEmpty) {
         eventData['direccion'] = params.address;
       }
-      final guestCount = params.guestCount;
+      final guestCount = params.guestCount as int?;
       if (guestCount != null && guestCount > 0) {
-        eventData['numero_invitados'] = params.guestCount;
+        eventData['numero_invitados'] = guestCount;
       }
 
       print('Datos del evento a insertar: $eventData');
@@ -420,10 +506,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Map<String, int>> getProviderDashboardData(String providerId) async {
     try {
+      final providerProfile = await supabaseClient
+        .from('perfil_proveedor')
+        .select('categoria_principal_id')
+        .eq('usuario_id', providerId)
+        .maybeSingle();
+
+      final providerCategoryId =
+        (providerProfile as Map<String, dynamic>?)?['categoria_principal_id']
+          as String?;
+
       final newRequests = await supabaseClient
           .from('solicitudes')
           .select('id')
-          .eq('estado', 'abierta');
+        .eq('estado', 'abierta')
+        .eq('categoria_servicio_id', providerCategoryId ?? '');
 
       final ongoingRequests = await supabaseClient
           .from('cotizaciones')

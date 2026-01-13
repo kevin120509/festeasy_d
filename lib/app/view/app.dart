@@ -9,12 +9,22 @@ import 'package:festeasy/features/requests/data/datasources/requests_remote_data
 import 'package:festeasy/features/requests/data/repositories/requests_repository_impl.dart';
 import 'package:festeasy/features/requests/domain/repositories/requests_repository.dart';
 import 'package:festeasy/features/requests/domain/usecases/get_requests_usecase.dart';
+import 'package:festeasy/features/requests/domain/usecases/get_provider_new_requests_usecase.dart';
+import 'package:festeasy/features/profile/data/datasources/profile_remote_datasource.dart';
+import 'package:festeasy/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:festeasy/features/profile/domain/repositories/profile_repository.dart';
+import 'package:festeasy/features/profile/domain/usecases/get_provider_profile_usecase.dart';
+import 'package:festeasy/features/profile/domain/usecases/update_provider_profile_usecase.dart';
 import 'package:festeasy/features/quotes/data/datasources/quote_remote_datasource.dart';
 import 'package:festeasy/features/quotes/data/repositories/quote_repository_impl.dart';
 import 'package:festeasy/features/quotes/domain/repositories/quote_repository.dart';
 import 'package:festeasy/features/quotes/domain/usecases/accept_quote.dart';
 import 'package:festeasy/features/quotes/domain/usecases/create_quote.dart';
+import 'package:festeasy/features/quotes/domain/usecases/delete_quote_usecase.dart';
 import 'package:festeasy/features/quotes/domain/usecases/get_quotes_for_request.dart';
+import 'package:festeasy/features/quotes/domain/usecases/update_quote_usecase.dart';
+import 'package:festeasy/features/quotes/domain/usecases/reject_quote.dart';
+import 'package:festeasy/features/quotes/domain/usecases/update_quote.dart';
 import 'package:festeasy/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,6 +92,10 @@ class _AppState extends State<App> {
           create: (context) =>
               GetRequestsUseCase(context.read<RequestsRepository>()),
         ),
+        RepositoryProvider<GetProviderNewRequestsUseCase>(
+          create: (context) =>
+              GetProviderNewRequestsUseCase(context.read<RequestsRepository>()),
+        ),
 
         // Quotes DataSources and Repository
         RepositoryProvider<QuoteRemoteDataSource>(
@@ -105,6 +119,36 @@ class _AppState extends State<App> {
         ),
         RepositoryProvider<AcceptQuote>(
           create: (context) => AcceptQuote(context.read<QuoteRepository>()),
+        ),
+        RepositoryProvider<DeleteQuoteUseCase>(
+          create: (context) =>
+              DeleteQuoteUseCase(context.read<QuoteRepository>()),
+        ),
+        RepositoryProvider<UpdateQuoteUseCase>(
+          create: (context) =>
+              UpdateQuoteUseCase(context.read<QuoteRepository>()),
+        ),
+
+        // Profile DataSources and Repository
+        RepositoryProvider<ProfileRemoteDataSource>(
+          create: (_) => ProfileRemoteDataSourceImpl(
+            supabaseClient: supabaseClient,
+          ),
+        ),
+        RepositoryProvider<ProfileRepository>(
+          create: (context) => ProfileRepositoryImpl(
+            context.read<ProfileRemoteDataSource>(),
+          ),
+        ),
+
+        // Profile Use Cases
+        RepositoryProvider<GetProviderProfileUseCase>(
+          create: (context) =>
+              GetProviderProfileUseCase(context.read<ProfileRepository>()),
+        ),
+        RepositoryProvider<UpdateProviderProfileUseCase>(
+          create: (context) =>
+              UpdateProviderProfileUseCase(context.read<ProfileRepository>()),
         ),
       ],
       child: ChangeNotifierProvider<AuthService>.value(

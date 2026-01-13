@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/quote.dart';
+import '../../domain/usecases/accept_quote.dart';
 import '../../domain/usecases/get_quotes_for_request.dart';
+import '../../domain/usecases/reject_quote.dart';
 
 /// Page to display quotes received for a specific request (for clients)
 class QuotesListPage extends StatefulWidget {
@@ -124,9 +126,11 @@ class _QuoteCard extends StatelessWidget {
   });
 
   Color _getStatusColor() {
-    switch (quote.status) {
+    switch (quote.status.toLowerCase()) {
+      case 'aceptada':
       case 'accepted':
         return Colors.green;
+      case 'rechazada':
       case 'rejected':
         return Colors.red;
       case 'expired':
@@ -137,9 +141,11 @@ class _QuoteCard extends StatelessWidget {
   }
 
   String _getStatusLabel() {
-    switch (quote.status) {
+    switch (quote.status.toLowerCase()) {
+      case 'aceptada':
       case 'accepted':
         return 'Aceptada';
+      case 'rechazada':
       case 'rejected':
         return 'Rechazada';
       case 'expired':
@@ -221,20 +227,46 @@ class _QuoteCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      // TODO: Implement reject
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Rechazar cotización')),
+                    onPressed: () async {
+                      final rejectQuote = context.read<RejectQuote>();
+                      final result = await rejectQuote(quote.id);
+                      if (!context.mounted) return;
+
+                      result.fold(
+                        (failure) => ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${failure.message}')),
+                        ),
+                        (_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cotización rechazada'),
+                            ),
+                          );
+                          onRefresh();
+                        },
                       );
                     },
                     child: const Text('Rechazar'),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement accept
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Aceptar cotización')),
+                    onPressed: () async {
+                      final acceptQuote = context.read<AcceptQuote>();
+                      final result = await acceptQuote(quote.id);
+                      if (!context.mounted) return;
+
+                      result.fold(
+                        (failure) => ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${failure.message}')),
+                        ),
+                        (_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cotización aceptada'),
+                            ),
+                          );
+                          onRefresh();
+                        },
                       );
                     },
                     style: ElevatedButton.styleFrom(
